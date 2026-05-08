@@ -49,8 +49,10 @@ func _apply_side_friction(state: PhysicsDirectBodyState2D):
 
 
 func _rotate(state: PhysicsDirectBodyState2D):
+	var local_v := state.transform.basis_xform_inv(state.linear_velocity)
+	var desired = input.move.x * (-1 if local_v.y > 0 else 1)
 	var accel := MovementHelper.get_accel(
-		input.move.x,
+		desired,
 		state.angular_velocity,
 		profile.turn_acceleration,
 		profile.turn_friction,
