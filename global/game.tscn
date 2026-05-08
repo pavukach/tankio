@@ -1,85 +1,94 @@
 [gd_scene format=3 uid="uid://61o2kgruhyte"]
 
+[ext_resource type="PackedScene" uid="uid://b7vq8kw3mlxp2" path="res://entities/projectile/projectile.tscn" id="2_gsc3t"]
 [ext_resource type="Script" uid="uid://bkss61o32q5om" path="res://multiplayer/player_spawner.gd" id="2_igirx"]
-[ext_resource type="PackedScene" uid="uid://ccvvsec2x25o3" path="res://player/tank.tscn" id="3_do21b"]
+[ext_resource type="PackedScene" uid="uid://ccvvsec2x25o3" path="res://entities/tank/tank.tscn" id="3_do21b"]
 [ext_resource type="Texture2D" uid="uid://bjtb0dbydgoit" path="res://icon.svg" id="4_do21b"]
 [ext_resource type="Script" uid="uid://cs5xp672qhwi5" path="res://multiplayer/client_text.gd" id="4_igirx"]
+[ext_resource type="Script" uid="uid://bea7xsh1jyg0n" path="res://entities/projectile/projectile_manager.gd" id="5_proj_mgr"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pf48g"]
 size = Vector2(128.76334, 122.994576)
 
-[node name="Game" type="Node2D" unique_id=1755592772]
+[node name="Game" type="Node2D" unique_id=1755592772 groups=["game"]]
 
-[node name="ClientText" type="Node" parent="." unique_id=2000000000]
-script = ExtResource("4_igirx")
-
-[node name="World" type="Node" parent="." unique_id=1706869027]
-
-[node name="Multiplayer" type="Node" parent="." unique_id=1611788388]
-
-[node name="PlayerSpawner" type="MultiplayerSpawner" parent="Multiplayer" unique_id=1809918278]
-spawn_path = NodePath("../../World")
+[node name="PlayerSpawner" type="MultiplayerSpawner" parent="." unique_id=1809918278]
+spawn_path = NodePath("../World")
 script = ExtResource("2_igirx")
 player = ExtResource("3_do21b")
 metadata/_custom_type_script = "uid://bkss61o32q5om"
 
-[node name="DebugText" type="RichTextLabel" parent="." unique_id=1234567890]
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -200.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = 300.0
-bbcode_enabled = true
-text = "Debug:"
+[node name="ProjectileManager" type="MultiplayerSpawner" parent="." unique_id=900000000]
+spawn_path = NodePath(".")
+script = ExtResource("5_proj_mgr")
+projectile_scene = ExtResource("2_gsc3t")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1628007133]
+[node name="World" type="Node" parent="." unique_id=1706869027]
+
+[node name="Walls" type="Node" parent="World" unique_id=218557700]
+
+[node name="Sprite2D" type="Sprite2D" parent="World/Walls" unique_id=1628007133]
 position = Vector2(-158, -174)
 texture = ExtResource("4_do21b")
 
-[node name="Sprite2D2" type="Sprite2D" parent="." unique_id=886347993]
+[node name="Sprite2D2" type="Sprite2D" parent="World/Walls" unique_id=886347993]
 position = Vector2(105.00001, -824)
 scale = Vector2(8.620467, -0.9268709)
 texture = ExtResource("4_do21b")
 
-[node name="StaticBody2D" type="StaticBody2D" parent="Sprite2D2" unique_id=2022007267]
+[node name="StaticBody2D" type="StaticBody2D" parent="World/Walls/Sprite2D2" unique_id=2022007267]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Sprite2D2/StaticBody2D" unique_id=1629057347]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Walls/Sprite2D2/StaticBody2D" unique_id=1629057347]
 position = Vector2(0.11600113, -2.157837)
 shape = SubResource("RectangleShape2D_pf48g")
 
-[node name="Sprite2D3" type="Sprite2D" parent="." unique_id=1806153411]
+[node name="Sprite2D3" type="Sprite2D" parent="World/Walls" unique_id=1806153411]
 position = Vector2(114, 249)
 scale = Vector2(8.620467, -0.9268709)
 texture = ExtResource("4_do21b")
 
-[node name="StaticBody2D" type="StaticBody2D" parent="Sprite2D3" unique_id=2067892338]
+[node name="StaticBody2D" type="StaticBody2D" parent="World/Walls/Sprite2D3" unique_id=2067892338]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Sprite2D3/StaticBody2D" unique_id=913931528]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Walls/Sprite2D3/StaticBody2D" unique_id=913931528]
 position = Vector2(0.11600113, -2.157837)
 shape = SubResource("RectangleShape2D_pf48g")
 
-[node name="Sprite2D4" type="Sprite2D" parent="." unique_id=376931679]
+[node name="Sprite2D4" type="Sprite2D" parent="World/Walls" unique_id=376931679]
 position = Vector2(737, -239)
 rotation = 1.5612042
-scale = Vector2(8.620467, -0.9268709)
+scale = Vector2(8.620467, -0.9268708)
 texture = ExtResource("4_do21b")
 
-[node name="StaticBody2D" type="StaticBody2D" parent="Sprite2D4" unique_id=379309603]
+[node name="StaticBody2D" type="StaticBody2D" parent="World/Walls/Sprite2D4" unique_id=379309603]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Sprite2D4/StaticBody2D" unique_id=970365388]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Walls/Sprite2D4/StaticBody2D" unique_id=970365388]
 position = Vector2(0.11600113, -2.157837)
 shape = SubResource("RectangleShape2D_pf48g")
 
-[node name="Sprite2D5" type="Sprite2D" parent="." unique_id=1311889197]
+[node name="Sprite2D5" type="Sprite2D" parent="World/Walls" unique_id=1311889197]
 position = Vector2(-518, -242)
 rotation = 1.5612042
-scale = Vector2(8.620467, -0.9268709)
+scale = Vector2(8.620467, -0.9268708)
 texture = ExtResource("4_do21b")
 
-[node name="StaticBody2D" type="StaticBody2D" parent="Sprite2D5" unique_id=1860001690]
+[node name="StaticBody2D" type="StaticBody2D" parent="World/Walls/Sprite2D5" unique_id=1860001690]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Sprite2D5/StaticBody2D" unique_id=1646294139]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Walls/Sprite2D5/StaticBody2D" unique_id=1646294139]
 position = Vector2(0.11600113, -2.157837)
 shape = SubResource("RectangleShape2D_pf48g")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=708564277]
+
+[node name="DebugText" type="RichTextLabel" parent="CanvasLayer" unique_id=1234567890]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -231.0
+offset_top = 47.0
+offset_right = -2.0
+offset_bottom = 480.0
+grow_horizontal = 0
+bbcode_enabled = true
+text = "Debug:"
+scroll_following = true
+script = ExtResource("4_igirx")

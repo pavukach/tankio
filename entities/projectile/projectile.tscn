@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://b7vq8kw3mlxp2"]
+
+[ext_resource type="Script" uid="uid://b8tog702vxrhq" path="res://entities/projectile/projectile.gd" id="1_pj32k"]
+[ext_resource type="Script" uid="uid://yhk7lwkqec5b" path="res://entities/projectile/projectile_profile.gd" id="2_proj"]
+[ext_resource type="Texture2D" uid="uid://bjtb0dbydgoit" path="res://icon.svg" id="3_icon"]
+[ext_resource type="Script" uid="uid://bmna402ylpwx6" path="res://multiplayer/sync_transform.gd" id="4_sync"]
+
+[sub_resource type="Resource" id="Resource_proj"]
+script = ExtResource("2_proj")
+speed = 300.0
+lifetime = 1500.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_proj"]
+radius = 8.0
+
+[node name="Projectile" type="Area2D" unique_id=17805090]
+script = ExtResource("1_pj32k")
+profile = SubResource("Resource_proj")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1419242651]
+shape = SubResource("CircleShape2D_proj")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1619925124]
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("3_icon")
+
+[node name="SyncTransform" type="Node2D" parent="." unique_id=433994400]
+script = ExtResource("4_sync")

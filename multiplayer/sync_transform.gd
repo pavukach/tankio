@@ -1,33 +1,44 @@
 class_name SyncTransform
 extends Node2D
 
-@onready var body := get_parent()
-var target_pos  := Vector2.ZERO
-var target_rot := 0.0
-
-var prev_pos  := Vector2.ZERO
-var prev_rot := 0.0
-
-var _since_update := 0.0
+@export var body: Node2D
 
 func _ready():
+	if not body:
+		body = get_parent()
 	target_pos = body.position
 	prev_pos = body.position
 	target_rot = body.rotation
 	prev_rot = body.rotation
-	
+	_ready_body()
+
+func _ready_body():
 	if not is_multiplayer_authority():
 		if body is RigidBody2D:
 			body.freeze = true
 			body.freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
 
+var target_pos := Vector2.ZERO
+var target_rot := 0.0
+var prev_pos := Vector2.ZERO
+var prev_rot := 0.0
+var _since_update := 0.0
+
+@rpc("authority", "call_local", "reliable")
+func despawn():
+	if body:
+		body.queue_free()
+	else:
+		queue_free()
+
 func _physics_process(_delta):
-	if not is_multiplayer_authority():
+	if not is_multiplayer_authority() or not body or not is_inside_tree():
 		return
 	rpc("sync_transform", body.position, body.rotation)
 
+
 func _process(_delta):
-	if is_multiplayer_authority():
+	if is_multiplayer_authority() or not body:
 		return
 	
 	_since_update += _delta

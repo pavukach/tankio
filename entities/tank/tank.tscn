@@ -8,28 +8,36 @@
 [ext_resource type="Script" uid="uid://c0skqmg2p74n3" path="res://entities/tank/turret/turret_movement.gd" id="7_yqsw2"]
 [ext_resource type="Script" uid="uid://cdasnsq3lre6q" path="res://player/follow_player.gd" id="8_88reu"]
 [ext_resource type="Script" uid="uid://b0x5vbwr4g3un" path="res://entities/tank/turret/turret_movement_profile.gd" id="8_uxfqh"]
+[ext_resource type="Script" uid="uid://c82kdd1k2dbm4" path="res://entities/tank/shooter/shooter.gd" id="9_shooter"]
+[ext_resource type="Script" uid="uid://g33xsh2gmllx" path="res://entities/tank/shooter/shooter_profile.gd" id="10_shooter_prof"]
+[ext_resource type="PackedScene" uid="uid://b7vq8kw3mlxp2" path="res://entities/projectile/projectile.tscn" id="12_proj_scene"]
 
 [sub_resource type="Resource" id="Resource_8fjmc"]
 script = ExtResource("2_ncygk")
-speed = 70.0
-reverse_speed = 30.0
-acceleration = 50.0
+speed = 120.0
+reverse_speed = 80.0
+acceleration = 70.0
 friction = 200.0
-turn_speed = 0.3490658503988659
-turn_acceleration = 0.2617993877991494
+turn_speed = 0.5235987755982988
+turn_acceleration = 0.3490658503988659
 turn_friction = 1.3962634015954636
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8fjmc"]
 
 [sub_resource type="Resource" id="Resource_ijcpc"]
 script = ExtResource("8_uxfqh")
-speed = 0.3490658503988659
-acceleration = 0.2617993877991494
-friction = 1.3962634015954636
+speed = 0.6981317007977318
+acceleration = 0.6108652381980153
+friction = 1.7453292519943295
 use_angles = true
 max_angle_left = 0.6981317007977318
 max_angle_right = 0.6981317007977318
 metadata/_custom_type_script = "uid://b0x5vbwr4g3un"
+
+[sub_resource type="Resource" id="Resource_shooter_prof"]
+script = ExtResource("10_shooter_prof")
+reload_time = 5.0
+projectile_scene = ExtResource("12_proj_scene")
 
 [node name="Hull" type="RigidBody2D" unique_id=1877747072 node_paths=PackedStringArray("input")]
 gravity_scale = 0.0
@@ -72,6 +80,17 @@ texture = ExtResource("4_uxfqh")
 [node name="SyncTransform" type="Node2D" parent="Turret" unique_id=474678055]
 script = ExtResource("5_ncygk")
 metadata/_custom_type_script = "uid://bmna402ylpwx6"
+
+[node name="Shooter" type="Node2D" parent="Turret" unique_id=900000001 node_paths=PackedStringArray("player", "input", "projectile_manager")]
+script = ExtResource("9_shooter")
+player = NodePath("../..")
+input = NodePath("../../InputReader")
+profile = SubResource("Resource_shooter_prof")
+projectile_manager = NodePath("../../../../ProjectileManager")
+
+[node name="Muzzle" type="Marker2D" parent="Turret/Shooter" unique_id=900000002]
+position = Vector2(0, -65)
+gizmo_extents = 5.0
 
 [node name="FollowPlayer" type="Camera2D" parent="." unique_id=27700681]
 script = ExtResource("8_88reu")

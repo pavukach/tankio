@@ -24,7 +24,9 @@ func _physics_process(delta: float) -> void:
 	
 	_angular_velocity += accel
 	rotation += _angular_velocity * delta
-	rotation = clampf(rotation, -profile.max_angle_left, profile.max_angle_right)
+	
+	if profile.use_angles:
+		rotation = clampf(rotation, -profile.max_angle_left, profile.max_angle_right)
 
 func _rotation_clamp(v, diff: float):
 	if abs(diff) < 0.01:
