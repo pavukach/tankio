@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://dt4t2tfbda38i"]
+
+[ext_resource type="Script" uid="uid://ks7yu333155d" path="res://multiplayer/multiplayer_init.gd" id="1_rkum2"]
+
+[node name="Connection" type="Node2D" unique_id=334230481]
+
+[node name="MultiplayerInit" type="Node" parent="." unique_id=846058539]
+script = ExtResource("1_rkum2")
+metadata/_custom_type_script = "uid://ks7yu333155d"
