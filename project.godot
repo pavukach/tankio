@@ -15,6 +15,10 @@ run/main_scene="uid://dt4t2tfbda38i"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[autoload]
+
+EventBus="*res://global/event_bus.gd"
+
 [input]
 
 player_ability={

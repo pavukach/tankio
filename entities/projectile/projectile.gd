@@ -2,6 +2,7 @@ class_name Projectile
 extends Area2D
 
 var owner_id: int
+var target_node: Node2D
 var _velocity := Vector2.ZERO
 var _lifetime := 5.0
 var _lifetime_timer := 0.0
@@ -20,7 +21,7 @@ func _physics_process(delta: float) -> void:
 	if is_multiplayer_authority():
 		_lifetime_timer += delta
 		if _lifetime_timer >= _lifetime:
-			$SyncTransform.rpc("despawn")
+			rpc("despawn")
 			return
 		position += _velocity * delta
 
@@ -47,9 +48,31 @@ func _handle_collision(node: Node2D) -> void:
 	if node.get_parent() and node.get_parent().name == str(owner_id):
 		return
 
+	target_node = node
 	apply_hit()
-	$SyncTransform.rpc("despawn")
+	rpc("despawn")
 
 
 func apply_hit() -> void:
-	pass
+	if is_instance_valid(target_node):
+		if target_node.has_method("take_damage"):
+			target_node.take_damage(profile.damage)
+			return
+
+		for child in target_node.get_children():
+			if child.has_method("take_damage"):
+				child.take_damage(profile.damage)
+				return
+
+	var parent := target_node.get_parent()
+	if parent:
+		for child in parent.get_children():
+			if child.has_method("take_damage"):
+				child.take_damage(profile.damage)
+				return
+
+@rpc("authority", "call_local", "reliable")
+func despawn():
+	if get_parent():
+		get_parent().remove_child(self)
+	queue_free()

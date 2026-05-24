@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://ccvvsec2x25o3"]
+[gd_scene format=3]
 
 [ext_resource type="Script" uid="uid://chsrjdu6ewsor" path="res://entities/tank/hull/hull_movement.gd" id="1_kjp8a"]
 [ext_resource type="Script" uid="uid://b0657fsvfwuak" path="res://entities/tank/tank.gd" id="1_tank"]
@@ -14,30 +14,30 @@
 [ext_resource type="PackedScene" uid="uid://b7vq8kw3mlxp2" path="res://entities/projectile/projectile.tscn" id="12_proj_scene"]
 [ext_resource type="Script" uid="uid://hrci1ryrxhb3" path="res://entities/tank/health/health.gd" id="13_health"]
 
-[sub_resource type="Resource" id="Resource_8fjmc"]
+[sub_resource type="Resource" id="Resource_hull_fast"]
 script = ExtResource("2_ncygk")
-speed = 120.0
-reverse_speed = 80.0
-acceleration = 70.0
+speed = 300.0
+reverse_speed = 120.0
+acceleration = 200.0
 friction = 200.0
 turn_speed = 0.5235987755982988
 turn_acceleration = 0.3490658503988659
 turn_friction = 1.3962634015954636
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_8fjmc"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fast"]
 
-[sub_resource type="Resource" id="Resource_ijcpc"]
+[sub_resource type="Resource" id="Resource_turret_fast"]
 script = ExtResource("8_uxfqh")
 speed = 0.6981317007977318
 acceleration = 0.6108652381980153
 friction = 1.7453292519943295
+use_angles = false
 max_angle_left = 0.6981317007977318
 max_angle_right = 0.6981317007977318
-metadata/_custom_type_script = "uid://b0x5vbwr4g3un"
 
-[sub_resource type="Resource" id="Resource_shooter_prof"]
+[sub_resource type="Resource" id="Resource_shooter_fast"]
 script = ExtResource("10_shooter_prof")
-reload_time = 5.0
+reload_time = 0.5
 projectile_scene = ExtResource("12_proj_scene")
 
 [node name="Tank" type="Node2D" unique_id=387432221 node_paths=PackedStringArray("hull", "turret", "shooter", "input_reader", "health")]
@@ -51,12 +51,12 @@ health = NodePath("Health")
 [node name="Hull" type="RigidBody2D" parent="." unique_id=1877747072]
 gravity_scale = 0.0
 script = ExtResource("1_kjp8a")
-profile = SubResource("Resource_8fjmc")
+profile = SubResource("Resource_hull_fast")
 metadata/_custom_type_script = "uid://chsrjdu6ewsor"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hull" unique_id=1669527066]
 scale = Vector2(4.5, 6)
-shape = SubResource("RectangleShape2D_8fjmc")
+shape = SubResource("RectangleShape2D_fast")
 
 [node name="Sprite2D" type="Sprite2D" parent="Hull/CollisionShape2D" unique_id=1394728479]
 scale = Vector2(0.16129033, 0.16129033)
@@ -69,7 +69,7 @@ metadata/_custom_type_script = "uid://bmna402ylpwx6"
 [node name="Turret" type="Node2D" parent="Hull" unique_id=1966867315]
 position = Vector2(0, -20)
 script = ExtResource("7_yqsw2")
-profile = SubResource("Resource_ijcpc")
+profile = SubResource("Resource_turret_fast")
 
 [node name="Turret2" type="Sprite2D" parent="Hull/Turret" unique_id=2111018259]
 scale = Vector2(0.5, 0.5)
@@ -86,7 +86,7 @@ metadata/_custom_type_script = "uid://bmna402ylpwx6"
 
 [node name="Shooter" type="Node2D" parent="Hull/Turret" unique_id=900000001 node_paths=PackedStringArray("muzzle")]
 script = ExtResource("9_shooter")
-profile = SubResource("Resource_shooter_prof")
+profile = SubResource("Resource_shooter_fast")
 muzzle = NodePath("Muzzle")
 
 [node name="Muzzle" type="Marker2D" parent="Hull/Turret/Shooter" unique_id=900000002]

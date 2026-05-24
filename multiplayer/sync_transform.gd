@@ -24,13 +24,6 @@ var prev_pos := Vector2.ZERO
 var prev_rot := 0.0
 var _since_update := 0.0
 
-@rpc("authority", "call_local", "reliable")
-func despawn():
-	if body:
-		body.queue_free()
-	else:
-		queue_free()
-
 func _physics_process(_delta):
 	if not is_multiplayer_authority() or not body or not is_inside_tree():
 		return

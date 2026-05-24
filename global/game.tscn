@@ -1,29 +1,45 @@
 [gd_scene format=3 uid="uid://61o2kgruhyte"]
 
 [ext_resource type="PackedScene" uid="uid://b7vq8kw3mlxp2" path="res://entities/projectile/projectile.tscn" id="2_gsc3t"]
-[ext_resource type="Script" uid="uid://bkss61o32q5om" path="res://multiplayer/player_spawner.gd" id="2_igirx"]
-[ext_resource type="PackedScene" uid="uid://ccvvsec2x25o3" path="res://entities/tank/tank.tscn" id="3_do21b"]
+[ext_resource type="Script" uid="uid://ofeo5vnoqkj0" path="res://multiplayer/tank_spawner.gd" id="2_igirx"]
+[ext_resource type="PackedScene" uid="uid://ccvvsec2x25o3" path="res://entities/tank/tank.tscn" id="3_tank"]
 [ext_resource type="Texture2D" uid="uid://bjtb0dbydgoit" path="res://icon.svg" id="4_do21b"]
 [ext_resource type="Script" uid="uid://cs5xp672qhwi5" path="res://multiplayer/client_text.gd" id="4_igirx"]
 [ext_resource type="Script" uid="uid://bea7xsh1jyg0n" path="res://entities/projectile/projectile_manager.gd" id="5_proj_mgr"]
+[ext_resource type="PackedScene" uid="uid://cvbujw6v37sbs" path="res://player/player_ui.tscn" id="6_player_ui"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pf48g"]
 size = Vector2(128.76334, 122.994576)
 
-[node name="Game" type="Node2D" unique_id=1755592772 groups=["game"]]
+[node name="Game" type="Node2D" unique_id=1755592772]
 
-[node name="PlayerSpawner" type="MultiplayerSpawner" parent="." unique_id=1809918278]
+[node name="TankSpawner" type="MultiplayerSpawner" parent="." unique_id=1809918278]
 spawn_path = NodePath("../World")
 script = ExtResource("2_igirx")
-player = ExtResource("3_do21b")
-metadata/_custom_type_script = "uid://bkss61o32q5om"
+spawn_points_root = NodePath("../World/SpawnPoints")
 
 [node name="ProjectileManager" type="MultiplayerSpawner" parent="." unique_id=900000000]
 spawn_path = NodePath(".")
 script = ExtResource("5_proj_mgr")
 projectile_scene = ExtResource("2_gsc3t")
 
+[node name="PlayerUI" parent="." unique_id=26122346 instance=ExtResource("6_player_ui")]
+
 [node name="World" type="Node" parent="." unique_id=1706869027]
+
+[node name="SpawnPoints" type="Node" parent="World" unique_id=900000002]
+
+[node name="SpawnPoint1" type="Marker2D" parent="World/SpawnPoints" unique_id=900000003]
+position = Vector2(549, -718)
+
+[node name="SpawnPoint2" type="Marker2D" parent="World/SpawnPoints" unique_id=900000004]
+position = Vector2(-365, -666)
+
+[node name="SpawnPoint3" type="Marker2D" parent="World/SpawnPoints" unique_id=900000005]
+position = Vector2(593, 103)
+
+[node name="SpawnPoint4" type="Marker2D" parent="World/SpawnPoints" unique_id=900000006]
+position = Vector2(-370, 122)
 
 [node name="Walls" type="Node" parent="World" unique_id=218557700]
 

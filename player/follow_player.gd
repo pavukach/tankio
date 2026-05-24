@@ -2,13 +2,15 @@ class_name FollowPlayer
 extends Camera2D
 
 func _ready():
-	var player_id = int(get_parent().name)
+	var tank := Tank.find_in(self)
+	var player_id := tank.get_player_id() if tank else 0
 	if multiplayer.get_unique_id() != player_id:
 		enabled = false
 		return
 	
 	enabled = true
 	make_current()
+	print("follow player")
 	top_level = true
 
 func _process(_delta):

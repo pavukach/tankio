@@ -28,7 +28,8 @@ func _process(_delta):
 	if camera:
 		mouse = camera.get_global_mouse_position()
 
-	rpc_id(1, "send_input", move, mouse, shooting, ability)
+	if not multiplayer.is_server():
+		rpc_id(1, "send_input", move, mouse, shooting, ability)
 
 @rpc("any_peer", "call_remote", "unreliable")
 func send_input(peer_move: Vector2, peer_mouse: Vector2, peer_shoot: bool, peer_ability: bool):
