@@ -16,6 +16,9 @@ func _ready():
 
 
 func _process(_delta):
+	var mp := multiplayer.multiplayer_peer
+	if mp == null or mp.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
+		return
 	if not is_multiplayer_authority():
 		return
 

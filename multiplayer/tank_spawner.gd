@@ -21,6 +21,7 @@ func _ready():
 
 	if multiplayer.is_server():
 		EventBus.spawn_requested.connect(_on_spawn_requested)
+		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 
 	spawn_function = _spawn_tank
 	_collect_spawn_points()
@@ -38,6 +39,9 @@ func _spawn_tank(data: Dictionary):
 	var id: int = data.id
 	var t: Node2D = entry.tank_scene.instantiate()
 	t.name = str(id)
+	t.add_to_group(str(id))
+	for child in t.find_children("*", "", true, false):
+		child.add_to_group(str(id))
 	t.position = data.position
 	t.rotation = data.rotation
 
@@ -76,6 +80,11 @@ func _on_spawn_requested(peer_id: int, tank_entry_index: int) -> void:
 		return
 	_player_tanks[peer_id] = tank
 	EventBus.send_spawned(peer_id, tank.get_path())
+
+func _on_peer_disconnected(peer_id: int) -> void:
+	var tank := _player_tanks.get(peer_id) as Node2D
+	if tank and is_instance_valid(tank):
+		_on_tank_died(tank)
 
 func _on_tank_died(tank: Node2D) -> void:
 	var peer_id := int(tank.name)

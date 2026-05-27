@@ -36,6 +36,9 @@ func _setup_health():
 		add_child(_health_component)
 
 func _process(_delta: float):
+	var mp := multiplayer.multiplayer_peer
+	if mp == null or mp.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
+		return
 	if not is_multiplayer_authority():
 		return
 
@@ -61,6 +64,4 @@ func take_damage(amount: float) -> void:
 
 @rpc("authority", "call_local", "reliable")
 func despawn():
-	if get_parent():
-		get_parent().remove_child(self)
-	queue_free()
+	call_deferred("queue_free")

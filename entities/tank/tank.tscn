@@ -13,6 +13,7 @@
 [ext_resource type="Script" uid="uid://g33xsh2gmllx" path="res://entities/tank/shooter/shooter_profile.gd" id="10_shooter_prof"]
 [ext_resource type="PackedScene" uid="uid://b7vq8kw3mlxp2" path="res://entities/projectile/projectile.tscn" id="12_proj_scene"]
 [ext_resource type="Script" uid="uid://hrci1ryrxhb3" path="res://entities/tank/health/health.gd" id="13_health"]
+[ext_resource type="Script" uid="uid://dnihpstxbomwv" path="res://entities/tank/armor/armor_plate.gd" id="14_armor"]
 
 [sub_resource type="Resource" id="Resource_8fjmc"]
 script = ExtResource("2_ncygk")
@@ -24,7 +25,17 @@ turn_speed = 0.5235987755982988
 turn_acceleration = 0.3490658503988659
 turn_friction = 1.3962634015954636
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_8fjmc"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hull"]
+size = Vector2(46, 62)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_front"]
+size = Vector2(91, 6)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_center"]
+size = Vector2(92, 106)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rear"]
+size = Vector2(89, 9)
 
 [sub_resource type="Resource" id="Resource_ijcpc"]
 script = ExtResource("8_uxfqh")
@@ -41,6 +52,7 @@ reload_time = 5.0
 projectile_scene = ExtResource("12_proj_scene")
 
 [node name="Tank" type="Node2D" unique_id=387432221 node_paths=PackedStringArray("hull", "turret", "shooter", "input_reader", "health")]
+unique_name_in_owner = true
 script = ExtResource("1_tank")
 hull = NodePath("Hull")
 turret = NodePath("Hull/Turret")
@@ -54,13 +66,32 @@ script = ExtResource("1_kjp8a")
 profile = SubResource("Resource_8fjmc")
 metadata/_custom_type_script = "uid://chsrjdu6ewsor"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hull" unique_id=1669527066]
-scale = Vector2(4.5, 6)
-shape = SubResource("RectangleShape2D_8fjmc")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hull"]
+shape = SubResource("RectangleShape2D_hull")
 
-[node name="Sprite2D" type="Sprite2D" parent="Hull/CollisionShape2D" unique_id=1394728479]
-scale = Vector2(0.16129033, 0.16129033)
+[node name="Sprite2D" type="Sprite2D" parent="Hull" unique_id=1791274254]
+scale = Vector2(0.7258065, 0.967742)
 texture = ExtResource("4_uxfqh")
+
+[node name="ArmorFront" type="CollisionShape2D" parent="Hull" unique_id=1068929112 node_paths=PackedStringArray("health")]
+position = Vector2(0, -59)
+shape = SubResource("RectangleShape2D_front")
+script = ExtResource("14_armor")
+thickness = 60.0
+health = NodePath("../../Health")
+
+[node name="ArmorCenter" type="CollisionShape2D" parent="Hull" unique_id=1657434172 node_paths=PackedStringArray("health")]
+position = Vector2(0, -2)
+shape = SubResource("RectangleShape2D_center")
+script = ExtResource("14_armor")
+health = NodePath("../../Health")
+
+[node name="ArmorRear" type="CollisionShape2D" parent="Hull" unique_id=1328706063 node_paths=PackedStringArray("health")]
+position = Vector2(0, 56.5)
+shape = SubResource("RectangleShape2D_rear")
+script = ExtResource("14_armor")
+thickness = 40.0
+health = NodePath("../../Health")
 
 [node name="SyncTransform" type="Node2D" parent="Hull" unique_id=1005316542]
 script = ExtResource("5_ncygk")

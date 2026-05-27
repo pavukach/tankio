@@ -33,10 +33,9 @@ func _physics_process(_delta: float) -> void:
 func _fire() -> void:
 	var spawn_pos := muzzle.global_position
 	var angle := global_rotation
-	var proj_profile := ProjectileProfile.new()
 	var tank := Tank.find_in(self)
 	var owner_id := tank.get_player_id() if tank else 0
-	var proj_data := ProjectileSpawnData.new(spawn_pos, angle, owner_id, proj_profile)
+	var proj_data := ProjectileSpawnData.new(spawn_pos, angle, owner_id)
 	_projectile_manager.spawn(proj_data.to_dict())
 	reload()
 
@@ -46,3 +45,13 @@ func reload() -> void:
 		return
 	_is_reloading = true
 	_reload_timer = profile.reload_time
+	rpc("sync_reload", profile.reload_time)
+
+@rpc("authority", "call_local", "reliable")
+func sync_reload(reload_time: float) -> void:
+	_is_reloading = true
+
+	_reload_timer = reload_time
+	var tank := Tank.find_in(self)
+	if tank:
+		EventBus.reload_started.emit(tank.get_player_id(), reload_time)

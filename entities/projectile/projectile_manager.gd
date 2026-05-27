@@ -26,5 +26,5 @@ func _spawn_projectile(data: Variant) -> Node:
 		print("Error: Failed to instantiate projectile scene")
 		return null
 		
-	scene.setup(p_data.from_pos, p_data.angle, p_data.shooter, p_data.profile)
+	scene.setup(p_data.from_pos, p_data.angle, p_data.shooter)
 	return scene
