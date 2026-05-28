@@ -17,6 +17,7 @@ normalization = 2.0
 radius = 8.0
 
 [node name="Projectile" type="Area2D" unique_id=17805090]
+z_index = 2
 script = ExtResource("1_pj32k")
 profile = SubResource("Resource_proj")
 

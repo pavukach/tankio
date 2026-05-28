@@ -3,11 +3,10 @@ extends MultiplayerSpawner
 
 @export var projectile_scene: PackedScene
 
-static var instance: ProjectileManager
-
 func _ready():
+	spawn_path = NodePath(".")
+	projectile_scene = preload("res://entities/projectile/projectile.tscn")
 	spawn_function = _spawn_projectile
-	instance = self
 
 
 func _spawn_projectile(data: Variant) -> Node:

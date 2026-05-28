@@ -19,7 +19,7 @@ func _ready() -> void:
 func _relay_health_changed(_new_health: float) -> void:
 	var tank := Tank.find_in(self)
 	if tank:
-		EventBus.health_updated.emit(tank.get_player_id(), _current_health, max_health)
+		LocalBus.health_updated.emit(tank.get_player_id(), _current_health, max_health)
 
 func take_damage(amount: float) -> void:
 	if not is_multiplayer_authority():

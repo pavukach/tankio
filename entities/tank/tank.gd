@@ -20,11 +20,22 @@ static func find_in(node: Node) -> Tank:
 	return null
 
 func get_player_id() -> int:
-	return int(name)
+	return get_meta("peer_id") if has_meta("peer_id") else 0
 
 func _ready():
 	if is_multiplayer_authority():
 		_setup_health()
+		_link_input()
+
+func _link_input():
+	if not input_reader:
+		return
+	if hull:
+		hull.input = input_reader
+	if turret:
+		turret.input = input_reader
+	if shooter:
+		shooter.input = input_reader
 
 func _setup_health():
 	if health:
@@ -34,23 +45,6 @@ func _setup_health():
 		_health_component = Health.new()
 		_health_component.max_health = max_health
 		add_child(_health_component)
-
-func _process(_delta: float):
-	var mp := multiplayer.multiplayer_peer
-	if mp == null or mp.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
-		return
-	if not is_multiplayer_authority():
-		return
-
-	if not input_reader:
-		return
-
-	if hull:
-		hull.input = input_reader
-	if turret:
-		turret.input = input_reader
-	if shooter:
-		shooter.input = input_reader
 
 func get_health() -> Health:
 	if health:

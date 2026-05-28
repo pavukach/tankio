@@ -13,7 +13,7 @@ func _ready():
 	if not is_multiplayer_authority():
 		process_mode = Node.PROCESS_MODE_DISABLED
 		return
-	_projectile_manager = ProjectileManager.instance
+	_projectile_manager = ProjManager
 
 func _physics_process(_delta: float) -> void:
 	if not is_multiplayer_authority() or not input:
@@ -54,4 +54,4 @@ func sync_reload(reload_time: float) -> void:
 	_reload_timer = reload_time
 	var tank := Tank.find_in(self)
 	if tank:
-		EventBus.reload_started.emit(tank.get_player_id(), reload_time)
+		LocalBus.reload_started.emit(tank.get_player_id(), reload_time)

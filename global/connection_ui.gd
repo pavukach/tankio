@@ -9,6 +9,7 @@ extends CanvasLayer
 
 func _ready() -> void:
 	connect_btn.pressed.connect(_on_connect_pressed)
+	LocalBus.connected.connect(_on_connected)
 
 func _on_connect_pressed() -> void:
 	connect_btn.disabled = true
@@ -21,3 +22,6 @@ func _on_connect_pressed() -> void:
 	if ip.is_empty():
 		ip = NetConfig.IP_ADDRESS
 	init_node.connect_to_server(ip, port)
+
+func _on_connected() -> void:
+	hide()

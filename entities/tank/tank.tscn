@@ -3,17 +3,18 @@
 [ext_resource type="Script" uid="uid://chsrjdu6ewsor" path="res://entities/tank/hull/hull_movement.gd" id="1_kjp8a"]
 [ext_resource type="Script" uid="uid://b0657fsvfwuak" path="res://entities/tank/tank.gd" id="1_tank"]
 [ext_resource type="Script" uid="uid://cfm61fu0d3b1h" path="res://entities/tank/hull/hull_movement_profile.gd" id="2_ncygk"]
-[ext_resource type="Script" uid="uid://c1eaw7cv3bdk3" path="res://player/input_reader.gd" id="3_yqsw2"]
+[ext_resource type="Script" uid="uid://c1eaw7cv3bdk3" path="res://ui/input_reader.gd" id="3_yqsw2"]
 [ext_resource type="Texture2D" uid="uid://bjtb0dbydgoit" path="res://icon.svg" id="4_uxfqh"]
 [ext_resource type="Script" uid="uid://bmna402ylpwx6" path="res://multiplayer/sync_transform.gd" id="5_ncygk"]
 [ext_resource type="Script" uid="uid://c0skqmg2p74n3" path="res://entities/tank/turret/turret_movement.gd" id="7_yqsw2"]
-[ext_resource type="Script" uid="uid://cdasnsq3lre6q" path="res://player/follow_player.gd" id="8_88reu"]
+[ext_resource type="Script" uid="uid://cdasnsq3lre6q" path="res://ui/follow_player.gd" id="8_88reu"]
 [ext_resource type="Script" uid="uid://b0x5vbwr4g3un" path="res://entities/tank/turret/turret_movement_profile.gd" id="8_uxfqh"]
 [ext_resource type="Script" uid="uid://c82kdd1k2dbm4" path="res://entities/tank/shooter/shooter.gd" id="9_shooter"]
 [ext_resource type="Script" uid="uid://g33xsh2gmllx" path="res://entities/tank/shooter/shooter_profile.gd" id="10_shooter_prof"]
 [ext_resource type="PackedScene" uid="uid://b7vq8kw3mlxp2" path="res://entities/projectile/projectile.tscn" id="12_proj_scene"]
 [ext_resource type="Script" uid="uid://hrci1ryrxhb3" path="res://entities/tank/health/health.gd" id="13_health"]
 [ext_resource type="Script" uid="uid://dnihpstxbomwv" path="res://entities/tank/armor/armor_plate.gd" id="14_armor"]
+[ext_resource type="Script" path="res://entities/tank/position_tracker.gd" id="16_pst"]
 
 [sub_resource type="Resource" id="Resource_8fjmc"]
 script = ExtResource("2_ncygk")
@@ -97,8 +98,12 @@ health = NodePath("../../Health")
 script = ExtResource("5_ncygk")
 metadata/_custom_type_script = "uid://bmna402ylpwx6"
 
+[node name="PositionTracker" type="Node2D" parent="Hull"]
+script = ExtResource("16_pst")
+
 [node name="Turret" type="Node2D" parent="Hull" unique_id=1966867315]
 position = Vector2(0, -20)
+z_index = 1
 script = ExtResource("7_yqsw2")
 profile = SubResource("Resource_ijcpc")
 

@@ -8,20 +8,20 @@ var _tank: Node2D
 @onready var _reload_bar := %ReloadBar
 
 func _ready():
-	if multiplayer.is_server():
-		return
+	LocalBus.connected.connect(initialize)
 
+func initialize():
 	_selector.tank_selected.connect(_on_tank_selected)
-	_selector.build(get_node("../TankSpawner") as TankSpawner)
+	_selector.build(TankSpawner)
 
-	EventBus.tank_spawned.connect(_on_tank_spawned)
-	EventBus.tank_died.connect(_on_tank_died)
-	EventBus.health_updated.connect(_on_health_updated)
-	EventBus.reload_started.connect(_on_reload_started)
+	NetworkBus.tank_spawned.connect(_on_tank_spawned)
+	NetworkBus.tank_died.connect(_on_tank_died)
+	LocalBus.health_updated.connect(_on_health_updated)
+	LocalBus.reload_started.connect(_on_reload_started)
 
 func _on_tank_selected(index: int):
 	_selector.hide()
-	EventBus.request_spawn(index)
+	NetworkBus.request_spawn(index)
 
 func _on_tank_spawned(tank_path: NodePath):
 	if _tank and is_instance_valid(_tank):
@@ -37,6 +37,7 @@ func _on_tank_died():
 	_reload_bar.stop()
 	_health_bar.hide()
 	_selector.show()
+	print("Tank died")
 
 func _on_health_updated(tank_id: int, current_health: float, max_health: float):
 	if not _tank or tank_id != _tank.get_player_id():

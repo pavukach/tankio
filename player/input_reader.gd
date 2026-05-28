@@ -12,7 +12,7 @@ func _ready():
 	if not multiplayer.is_server() and not is_multiplayer_authority():
 		queue_free()
 		return
-	
+	camera = get_viewport().get_camera_2d()
 
 
 func _process(_delta):
@@ -27,7 +27,6 @@ func _process(_delta):
 	shooting = Input.is_action_pressed("player_shoot")
 	ability = Input.is_action_pressed("player_ability")
 
-	camera = get_viewport().get_camera_2d()
 	if camera:
 		mouse = camera.get_global_mouse_position()
 
@@ -40,4 +39,3 @@ func send_input(peer_move: Vector2, peer_mouse: Vector2, peer_shoot: bool, peer_
 	mouse = peer_mouse
 	shooting = peer_shoot
 	ability = peer_ability
-

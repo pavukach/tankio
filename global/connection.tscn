@@ -1,14 +1,15 @@
 [gd_scene format=3 uid="uid://dt4t2tfbda38i"]
 
 [ext_resource type="Script" uid="uid://ks7yu333155d" path="res://multiplayer/multiplayer_init.gd" id="1_init"]
-[ext_resource type="Script" path="res://global/connection_ui.gd" id="2_ui"]
+[ext_resource type="Script" uid="uid://dgacdim2vlm34" path="res://global/connection_ui.gd" id="2_ui"]
 
-[node name="Connection" type="Node2D"]
+[node name="Connection" type="Node2D" unique_id=290928930]
 
-[node name="UI" type="CanvasLayer" parent="."]
+[node name="UI" type="CanvasLayer" parent="." unique_id=13910037]
+layer = 1
 script = ExtResource("2_ui")
 
-[node name="Panel" type="Panel" parent="UI"]
+[node name="Panel" type="Panel" parent="UI" unique_id=745806154]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -19,8 +20,8 @@ offset_top = -100.0
 offset_right = 160.0
 offset_bottom = 100.0
 
-[node name="VBox" type="VBoxContainer" parent="UI/Panel"]
-anchors_preset = 15
+[node name="VBox" type="VBoxContainer" parent="UI/Panel" unique_id=961352676]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
@@ -28,42 +29,52 @@ offset_top = 16.0
 offset_right = -16.0
 offset_bottom = -16.0
 
-[node name="Title" type="Label" parent="UI/Panel/VBox"]
+[node name="Title" type="Label" parent="UI/Panel/VBox" unique_id=658164745]
+layout_mode = 2
 text = "Connect to Server"
 horizontal_alignment = 1
 
-[node name="IPRow" type="HBoxContainer" parent="UI/Panel/VBox"]
+[node name="IPRow" type="HBoxContainer" parent="UI/Panel/VBox" unique_id=240983826]
+layout_mode = 2
 
-[node name="IPLabel" type="Label" parent="UI/Panel/VBox/IPRow"]
+[node name="IPLabel" type="Label" parent="UI/Panel/VBox/IPRow" unique_id=713481680]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
 text = "IP:"
-custom_minimum_size = Vector2(40, 0)
 
-[node name="IPInput" type="LineEdit" parent="UI/Panel/VBox/IPRow"]
+[node name="IPInput" type="LineEdit" parent="UI/Panel/VBox/IPRow" unique_id=944235778]
 unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
 text = "127.0.0.1"
-size_flags_horizontal = 3
 
-[node name="PortRow" type="HBoxContainer" parent="UI/Panel/VBox"]
+[node name="PortRow" type="HBoxContainer" parent="UI/Panel/VBox" unique_id=1361561036]
+layout_mode = 2
 
-[node name="PortLabel" type="Label" parent="UI/Panel/VBox/PortRow"]
-text = "Port:"
+[node name="PortLabel" type="Label" parent="UI/Panel/VBox/PortRow" unique_id=1566937577]
 custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+text = "Port:"
 
-[node name="PortInput" type="LineEdit" parent="UI/Panel/VBox/PortRow"]
+[node name="PortInput" type="LineEdit" parent="UI/Panel/VBox/PortRow" unique_id=1081603513]
 unique_name_in_owner = true
-text = "4242"
+layout_mode = 2
 size_flags_horizontal = 3
+text = "4242"
 
-[node name="Spacer" type="Control" parent="UI/Panel/VBox"]
+[node name="Spacer" type="Control" parent="UI/Panel/VBox" unique_id=1749177997]
 custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
 
-[node name="ConnectBtn" type="Button" parent="UI/Panel/VBox"]
+[node name="ConnectBtn" type="Button" parent="UI/Panel/VBox" unique_id=979422442]
 unique_name_in_owner = true
+layout_mode = 2
 text = "Connect"
 
-[node name="StatusLabel" type="Label" parent="UI/Panel/VBox"]
+[node name="StatusLabel" type="Label" parent="UI/Panel/VBox" unique_id=1089919299]
 unique_name_in_owner = true
 visible = false
+layout_mode = 2
 text = "Connecting..."
 horizontal_alignment = 1
 
