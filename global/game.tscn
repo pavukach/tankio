@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://bm1snl1ok1217" path="res://global/game.gd" id="1_game"]
 [ext_resource type="PackedScene" uid="uid://b7vq8kw3mlxp2" path="res://entities/projectile/projectile.tscn" id="2_gsc3t"]
 [ext_resource type="Texture2D" uid="uid://bjtb0dbydgoit" path="res://icon.svg" id="4_do21b"]
-[ext_resource type="Script" uid="uid://cs5xp672qhwi5" path="res://multiplayer/client_text.gd" id="4_igirx"]
 [ext_resource type="Script" uid="uid://bea7xsh1jyg0n" path="res://entities/projectile/projectile_manager.gd" id="5_proj_mgr"]
 [ext_resource type="PackedScene" uid="uid://cvbujw6v37sbs" path="res://ui/player_ui.tscn" id="6_player_ui"]
 
@@ -87,19 +86,3 @@ texture = ExtResource("4_do21b")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="World/Walls/Sprite2D5/StaticBody2D" unique_id=1646294139]
 position = Vector2(0.11600113, -2.157837)
 shape = SubResource("RectangleShape2D_pf48g")
-
-[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=708564277]
-
-[node name="DebugText" type="RichTextLabel" parent="CanvasLayer" unique_id=1234567890]
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -231.0
-offset_top = 47.0
-offset_right = -2.0
-offset_bottom = 480.0
-grow_horizontal = 0
-bbcode_enabled = true
-text = "Debug:"
-scroll_following = true
-script = ExtResource("4_igirx")
