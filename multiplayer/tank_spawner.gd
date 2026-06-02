@@ -9,15 +9,15 @@ var _spawn_data: Dictionary[int, Dictionary] = {}
 
 func _ready():
 	if tank_entries.is_empty():
-		var default_entry := TankEntry.new()
-		default_entry.display_name = "Default"
-		default_entry.tank_scene = load("res://entities/tank/tank.tscn")
-		tank_entries.append(default_entry)
+		var valentine_entry := TankEntry.new()
+		valentine_entry.display_name = "Valentine"
+		valentine_entry.tank_scene = load("res://entities/tank/valentine/valentine.tscn")
+		tank_entries.append(valentine_entry)
 
-		var fast_entry := TankEntry.new()
-		fast_entry.display_name = "Fast"
-		fast_entry.tank_scene = load("res://entities/tank/tank_fast.tscn")
-		tank_entries.append(fast_entry)
+		var pziii_entry := TankEntry.new()
+		pziii_entry.display_name = "Pz III"
+		pziii_entry.tank_scene = load("res://entities/tank/pz_iii/pz_iii.tscn")
+		tank_entries.append(pziii_entry)
 
 	if multiplayer.is_server():
 		NetworkBus.spawn_requested.connect(_on_spawn_requested)

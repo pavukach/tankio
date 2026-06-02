@@ -1,0 +1,136 @@
+[gd_scene format=3 uid="uid://cb02jikaxrfa8"]
+
+[ext_resource type="Script" uid="uid://chsrjdu6ewsor" path="res://entities/tank/hull/hull_movement.gd" id="1_kjp8a"]
+[ext_resource type="Script" uid="uid://b0657fsvfwuak" path="res://entities/tank/tank.gd" id="1_tank"]
+[ext_resource type="Script" uid="uid://cfm61fu0d3b1h" path="res://entities/tank/hull/hull_movement_profile.gd" id="2_ncygk"]
+[ext_resource type="Script" uid="uid://c1eaw7cv3bdk3" path="res://player/input_reader.gd" id="3_yqsw2"]
+[ext_resource type="Texture2D" uid="uid://bisaus8hgfb0l" path="res://entities/tank/pz_iii/pz_iii_hull.png" id="4_x13eu"]
+[ext_resource type="Script" uid="uid://bmna402ylpwx6" path="res://multiplayer/sync_transform.gd" id="5_ncygk"]
+[ext_resource type="Script" uid="uid://c0skqmg2p74n3" path="res://entities/tank/turret/turret_movement.gd" id="7_yqsw2"]
+[ext_resource type="Script" uid="uid://cdasnsq3lre6q" path="res://player/follow_player.gd" id="8_88reu"]
+[ext_resource type="Script" uid="uid://b0x5vbwr4g3un" path="res://entities/tank/turret/turret_movement_profile.gd" id="8_uxfqh"]
+[ext_resource type="Script" uid="uid://c82kdd1k2dbm4" path="res://entities/tank/shooter/shooter.gd" id="9_shooter"]
+[ext_resource type="Texture2D" uid="uid://cj16hyunltg3h" path="res://entities/tank/pz_iii/pz_iii_turret.png" id="10_rwfx0"]
+[ext_resource type="Script" uid="uid://g33xsh2gmllx" path="res://entities/tank/shooter/shooter_profile.gd" id="10_shooter_prof"]
+[ext_resource type="PackedScene" uid="uid://dsgevwyr8ip0u" path="res://entities/projectile/projectiles/pz_iii_projectile.tscn" id="12_rwfx0"]
+[ext_resource type="Script" uid="uid://hrci1ryrxhb3" path="res://entities/tank/health/health.gd" id="13_health"]
+[ext_resource type="Script" uid="uid://dnihpstxbomwv" path="res://entities/tank/armor/armor_plate.gd" id="14_armor"]
+[ext_resource type="Script" uid="uid://cijxdg1gtim6" path="res://entities/tank/position_tracker.gd" id="16_pst"]
+
+[sub_resource type="Resource" id="Resource_pz_hull"]
+script = ExtResource("2_ncygk")
+speed = 220.0
+reverse_speed = 65.0
+acceleration = 90.0
+friction = 150.0
+turn_speed = 0.6108652381980153
+turn_acceleration = 0.4363323129985824
+turn_friction = 1.4
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pz_front"]
+size = Vector2(117.5, 6)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pz_center"]
+size = Vector2(119, 221)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pz_rear"]
+size = Vector2(120, 6)
+
+[sub_resource type="Resource" id="Resource_pz_turret"]
+script = ExtResource("8_uxfqh")
+speed = 0.7
+acceleration = 0.6
+friction = 1.7
+max_angle_left = 0.6981317007977318
+max_angle_right = 0.6981317007977318
+metadata/_custom_type_script = "uid://b0x5vbwr4g3un"
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_76tmg"]
+
+[sub_resource type="Resource" id="Resource_pz_shooter"]
+script = ExtResource("10_shooter_prof")
+reload_time = 2.6
+projectile_scene = ExtResource("12_rwfx0")
+
+[node name="Tank" type="Node2D" unique_id=2004333861 node_paths=PackedStringArray("hull", "turret", "shooter", "input_reader", "health")]
+unique_name_in_owner = true
+script = ExtResource("1_tank")
+hull = NodePath("Hull")
+turret = NodePath("Hull/Turret")
+shooter = NodePath("Hull/Turret/Shooter")
+input_reader = NodePath("InputReader")
+health = NodePath("Health")
+max_health = 90.0
+
+[node name="Hull" type="RigidBody2D" parent="." unique_id=903922903]
+gravity_scale = 0.0
+script = ExtResource("1_kjp8a")
+profile = SubResource("Resource_pz_hull")
+metadata/_custom_type_script = "uid://chsrjdu6ewsor"
+
+[node name="Sprite2D" type="Sprite2D" parent="Hull" unique_id=1139392399]
+texture = ExtResource("4_x13eu")
+
+[node name="ArmorFront" type="CollisionShape2D" parent="Hull" unique_id=849448652]
+position = Vector2(0, -116)
+shape = SubResource("RectangleShape2D_pz_front")
+script = ExtResource("14_armor")
+
+[node name="ArmorCenter" type="CollisionShape2D" parent="Hull" unique_id=12088571]
+position = Vector2(0, -2.5)
+shape = SubResource("RectangleShape2D_pz_center")
+script = ExtResource("14_armor")
+thickness = 30.0
+
+[node name="ArmorRear" type="CollisionShape2D" parent="Hull" unique_id=460058712]
+position = Vector2(0, 111)
+shape = SubResource("RectangleShape2D_pz_rear")
+script = ExtResource("14_armor")
+
+[node name="SyncTransform" type="Node2D" parent="Hull" unique_id=1187105713]
+script = ExtResource("5_ncygk")
+metadata/_custom_type_script = "uid://bmna402ylpwx6"
+
+[node name="PositionTracker" type="Node2D" parent="Hull" unique_id=87249735]
+script = ExtResource("16_pst")
+
+[node name="Turret" type="Node2D" parent="Hull" unique_id=1499998630]
+z_index = 1
+position = Vector2(0, -21)
+script = ExtResource("7_yqsw2")
+profile = SubResource("Resource_pz_turret")
+
+[node name="TurretSprite" type="Sprite2D" parent="Hull/Turret" unique_id=1782464573]
+position = Vector2(0, -16)
+scale = Vector2(0.55, 0.55)
+texture = ExtResource("10_rwfx0")
+
+[node name="GunSprite" type="Sprite2D" parent="Hull/Turret" unique_id=803657789]
+position = Vector2(0, -55)
+scale = Vector2(0.08, 0.35)
+texture = SubResource("CompressedTexture2D_76tmg")
+
+[node name="SyncTransform" type="Node2D" parent="Hull/Turret" unique_id=1643599320]
+script = ExtResource("5_ncygk")
+metadata/_custom_type_script = "uid://bmna402ylpwx6"
+
+[node name="Shooter" type="Node2D" parent="Hull/Turret" unique_id=1530965207 node_paths=PackedStringArray("muzzle")]
+script = ExtResource("9_shooter")
+profile = SubResource("Resource_pz_shooter")
+muzzle = NodePath("Muzzle")
+
+[node name="Muzzle" type="Marker2D" parent="Hull/Turret/Shooter" unique_id=1752537592]
+position = Vector2(0, -84)
+gizmo_extents = 5.0
+
+[node name="FollowPlayer" type="Camera2D" parent="Hull" unique_id=78520487]
+script = ExtResource("8_88reu")
+
+[node name="InputReader" type="Node" parent="." unique_id=1567003853]
+unique_name_in_owner = true
+script = ExtResource("3_yqsw2")
+metadata/_custom_type_script = "uid://c1eaw7cv3bdk3"
+
+[node name="Health" type="Node" parent="." unique_id=177135077]
+unique_name_in_owner = true
+script = ExtResource("13_health")

@@ -1,13 +1,41 @@
 [gd_scene format=3 uid="uid://61o2kgruhyte"]
 
 [ext_resource type="Script" uid="uid://bm1snl1ok1217" path="res://global/game.gd" id="1_game"]
-[ext_resource type="PackedScene" uid="uid://b7vq8kw3mlxp2" path="res://entities/projectile/projectile.tscn" id="2_gsc3t"]
+[ext_resource type="Script" uid="uid://b8tog702vxrhq" path="res://entities/projectile/projectile.gd" id="3_5bs8x"]
 [ext_resource type="Texture2D" uid="uid://bjtb0dbydgoit" path="res://icon.svg" id="4_do21b"]
+[ext_resource type="Script" uid="uid://yhk7lwkqec5b" path="res://entities/projectile/projectile_profile.gd" id="4_eyeo0"]
 [ext_resource type="Script" uid="uid://bea7xsh1jyg0n" path="res://entities/projectile/projectile_manager.gd" id="5_proj_mgr"]
+[ext_resource type="Texture2D" uid="uid://4c53a54dyaib" path="res://global/background.png" id="6_gsc3t"]
+[ext_resource type="Script" uid="uid://bmna402ylpwx6" path="res://multiplayer/sync_transform.gd" id="6_n2dpw"]
 [ext_resource type="PackedScene" uid="uid://cvbujw6v37sbs" path="res://ui/player_ui.tscn" id="6_player_ui"]
 
+[sub_resource type="Resource" id="Resource_proj"]
+script = ExtResource("4_eyeo0")
+lifetime = 3.0
+penetration = 75.0
+decay_rate = 25.0
+normalization = 5.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_proj"]
+radius = 8.0
+
+[sub_resource type="PackedScene" id="PackedScene_3jcm0"]
+_bundled = {
+"conn_count": 0,
+"conns": PackedInt32Array(),
+"editable_instances": [],
+"id_paths": [PackedInt32Array(), PackedInt32Array(), PackedInt32Array()],
+"names": PackedStringArray("Projectile", "Area2D", "z_index", "script", "profile", "CollisionShape2D", "CollisionShape2D", "shape", "Sprite2D", "Sprite2D", "scale", "texture", "SyncTransform", "Node2D", "script"),
+"node_count": 4,
+"node_ids": PackedInt32Array(17805090, 1419242651, 1619925124, 433994400),
+"node_paths": [NodePath("."), NodePath("."), NodePath(".")],
+"nodes": PackedInt32Array(-1, -1, 1, 0, -1, 3, 2, 0, 3, 1, 4, 2, 0, 1073741824, 0, 6, 5, -1, 1, 7, 3, 0, 1073741825, 0, 9, 8, -1, 2, 10, 4, 11, 5, 0, 1073741826, 0, 13, 12, -1, 1, 14, 6, 0),
+"variants": [2, ExtResource("3_5bs8x"), SubResource("Resource_proj"), SubResource("CircleShape2D_proj"), Vector2(0.1, 0.1), ExtResource("4_do21b"), ExtResource("6_n2dpw")],
+"version": 3
+}
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pf48g"]
-size = Vector2(128.76334, 122.994576)
+size = Vector2(128.76334, 127.30513)
 
 [node name="Game" type="Node2D" unique_id=1755592772]
 script = ExtResource("1_game")
@@ -15,7 +43,7 @@ script = ExtResource("1_game")
 [node name="ProjectileManager" type="MultiplayerSpawner" parent="." unique_id=900000000]
 spawn_path = NodePath(".")
 script = ExtResource("5_proj_mgr")
-projectile_scene = ExtResource("2_gsc3t")
+projectile_scene = SubResource("PackedScene_3jcm0")
 
 [node name="PlayerUI" parent="." unique_id=26122346 instance=ExtResource("6_player_ui")]
 
@@ -24,65 +52,114 @@ projectile_scene = ExtResource("2_gsc3t")
 [node name="SpawnPoints" type="Node" parent="World" unique_id=900000002]
 
 [node name="SpawnPoint1" type="Marker2D" parent="World/SpawnPoints" unique_id=900000003]
-position = Vector2(549, -718)
+position = Vector2(893, -663)
 
 [node name="SpawnPoint2" type="Marker2D" parent="World/SpawnPoints" unique_id=900000004]
-position = Vector2(-365, -666)
+position = Vector2(-720, -688)
 
 [node name="SpawnPoint3" type="Marker2D" parent="World/SpawnPoints" unique_id=900000005]
-position = Vector2(593, 103)
+position = Vector2(937, 526)
 
 [node name="SpawnPoint4" type="Marker2D" parent="World/SpawnPoints" unique_id=900000006]
-position = Vector2(-370, 122)
+position = Vector2(-760, 616)
 
 [node name="Walls" type="Node" parent="World" unique_id=218557700]
 
-[node name="Sprite2D" type="Sprite2D" parent="World/Walls" unique_id=1628007133]
-position = Vector2(-158, -174)
+[node name="Wall" type="StaticBody2D" parent="World/Walls" unique_id=2022007267]
+position = Vector2(105, -1218)
+scale = Vector2(20, 0.9)
+
+[node name="Wall" type="Sprite2D" parent="World/Walls/Wall" unique_id=886347993]
 texture = ExtResource("4_do21b")
 
-[node name="Sprite2D2" type="Sprite2D" parent="World/Walls" unique_id=886347993]
-position = Vector2(105.00001, -824)
-scale = Vector2(8.620467, -0.9268709)
-texture = ExtResource("4_do21b")
-
-[node name="StaticBody2D" type="StaticBody2D" parent="World/Walls/Sprite2D2" unique_id=2022007267]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Walls/Sprite2D2/StaticBody2D" unique_id=1629057347]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Walls/Wall" unique_id=1629057347]
 position = Vector2(0.11600113, -2.157837)
 shape = SubResource("RectangleShape2D_pf48g")
 
-[node name="Sprite2D3" type="Sprite2D" parent="World/Walls" unique_id=1806153411]
-position = Vector2(114, 249)
-scale = Vector2(8.620467, -0.9268709)
+[node name="Wall2" type="StaticBody2D" parent="World/Walls" unique_id=1355801545]
+position = Vector2(104.00001, 1117)
+scale = Vector2(20, 0.9)
+
+[node name="Wall" type="Sprite2D" parent="World/Walls/Wall2" unique_id=640088337]
 texture = ExtResource("4_do21b")
 
-[node name="StaticBody2D" type="StaticBody2D" parent="World/Walls/Sprite2D3" unique_id=2067892338]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Walls/Sprite2D3/StaticBody2D" unique_id=913931528]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Walls/Wall2" unique_id=158568135]
 position = Vector2(0.11600113, -2.157837)
 shape = SubResource("RectangleShape2D_pf48g")
 
-[node name="Sprite2D4" type="Sprite2D" parent="World/Walls" unique_id=376931679]
-position = Vector2(737, -239)
-rotation = 1.5612042
-scale = Vector2(8.620467, -0.9268708)
+[node name="Wall3" type="StaticBody2D" parent="World/Walls" unique_id=955165177]
+position = Vector2(-1247.0001, -87)
+scale = Vector2(0.9, 20)
+
+[node name="Wall" type="Sprite2D" parent="World/Walls/Wall3" unique_id=704735137]
 texture = ExtResource("4_do21b")
 
-[node name="StaticBody2D" type="StaticBody2D" parent="World/Walls/Sprite2D4" unique_id=379309603]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Walls/Sprite2D4/StaticBody2D" unique_id=970365388]
-position = Vector2(0.11600113, -2.157837)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Walls/Wall3" unique_id=1131496756]
+position = Vector2(0.1159668, -0.0025615692)
 shape = SubResource("RectangleShape2D_pf48g")
 
-[node name="Sprite2D5" type="Sprite2D" parent="World/Walls" unique_id=1311889197]
-position = Vector2(-518, -242)
-rotation = 1.5612042
-scale = Vector2(8.620467, -0.9268708)
+[node name="Wall4" type="StaticBody2D" parent="World/Walls" unique_id=919502766]
+position = Vector2(1467.9999, -87)
+scale = Vector2(0.9, 20)
+
+[node name="Wall" type="Sprite2D" parent="World/Walls/Wall4" unique_id=1341287620]
 texture = ExtResource("4_do21b")
 
-[node name="StaticBody2D" type="StaticBody2D" parent="World/Walls/Sprite2D5" unique_id=1860001690]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Walls/Sprite2D5/StaticBody2D" unique_id=1646294139]
-position = Vector2(0.11600113, -2.157837)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Walls/Wall4" unique_id=1616461212]
+position = Vector2(0.1159668, -0.0025615692)
 shape = SubResource("RectangleShape2D_pf48g")
+
+[node name="Wall5" type="StaticBody2D" parent="World/Walls" unique_id=509163823]
+position = Vector2(391, -78)
+rotation = 0.61086524
+scale = Vector2(0.9, 5)
+
+[node name="Wall" type="Sprite2D" parent="World/Walls/Wall5" unique_id=1041932099]
+texture = ExtResource("4_do21b")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Walls/Wall5" unique_id=2112293483]
+position = Vector2(0.1159668, -0.0025615692)
+shape = SubResource("RectangleShape2D_pf48g")
+
+[node name="Wall6" type="StaticBody2D" parent="World/Walls" unique_id=218481005]
+position = Vector2(-870, -126)
+rotation = 2.1816616
+scale = Vector2(0.9, 5)
+
+[node name="Wall" type="Sprite2D" parent="World/Walls/Wall6" unique_id=1627146272]
+texture = ExtResource("4_do21b")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Walls/Wall6" unique_id=1462915343]
+position = Vector2(0.1159668, -0.0025615692)
+shape = SubResource("RectangleShape2D_pf48g")
+
+[node name="Wall7" type="StaticBody2D" parent="World/Walls" unique_id=697769760]
+position = Vector2(-149, 756)
+scale = Vector2(0.9, 5)
+
+[node name="Wall" type="Sprite2D" parent="World/Walls/Wall7" unique_id=1558307167]
+texture = ExtResource("4_do21b")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Walls/Wall7" unique_id=814069583]
+position = Vector2(0.1159668, -0.0025615692)
+shape = SubResource("RectangleShape2D_pf48g")
+
+[node name="Wall8" type="StaticBody2D" parent="World/Walls" unique_id=72879609]
+position = Vector2(151, -846)
+scale = Vector2(0.9, 5)
+
+[node name="Wall" type="Sprite2D" parent="World/Walls/Wall8" unique_id=1837270244]
+texture = ExtResource("4_do21b")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Walls/Wall8" unique_id=1149646273]
+position = Vector2(0.1159668, -0.0025615692)
+shape = SubResource("RectangleShape2D_pf48g")
+
+[node name="Parallax2D" type="Parallax2D" parent="." unique_id=1429219460]
+repeat_size = Vector2(400, 400)
+repeat_times = 12
+
+[node name="Sprite2D" type="Sprite2D" parent="Parallax2D" unique_id=1837061972]
+z_index = -3
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("6_gsc3t")

@@ -35,7 +35,8 @@ func _fire() -> void:
 	var angle := global_rotation
 	var tank := Tank.find_in(self)
 	var owner_id := tank.get_player_id() if tank else 0
-	var proj_data := ProjectileSpawnData.new(spawn_pos, angle, owner_id)
+	var scene_path := profile.projectile_scene.resource_path if profile and profile.projectile_scene else ""
+	var proj_data := ProjectileSpawnData.new(spawn_pos, angle, owner_id, scene_path)
 	_projectile_manager.spawn(proj_data.to_dict())
 	reload()
 
