@@ -1,0 +1,32 @@
+name: Deploy Web Client
+
+on:
+  push:
+    branches: [unstable]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-web:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Build Godot Web
+        run: godot --headless --export-release "Web" build/index.html
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
