@@ -5,9 +5,7 @@ on:
     branches: [unstable]
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
@@ -22,11 +20,37 @@ jobs:
       - uses: actions/checkout@v4
         with:
           lfs: true
+      - name: Install Web export templates
+        run: |
+          wget -q https://github.com/godotengine/godot/releases/download/4.6-stable/Godot_v4.6-stable_export_templates.tpz
+          mkdir -p "$HOME/.local/share/godot/export_templates/4.6.stable"
+          unzip -q Godot_v4.6-stable_export_templates.tpz -d "$HOME/.local/share/godot/export_templates/4.6.stable"
+          if [ -d "$HOME/.local/share/godot/export_templates/4.6.stable/templates" ]; then
+            mv "$HOME/.local/share/godot/export_templates/4.6.stable/templates/"* "$HOME/.local/share/godot/export_templates/4.6.stable/"
+            rmdir "$HOME/.local/share/godot/export_templates/4.6.stable/templates"
+          fi
+          rm -f Godot_v4.6-stable_export_templates.tpz
       - name: Build Godot Web
         run: godot --headless --export-release "Web" build/index.html
-      - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
+          name: web-build
           path: build
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+
+  deploy-web:
+    needs: build-web
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: build
+      - name: Deploy to web branch (orphan, build files only)
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: build
+          publish_branch: web
+          force_orphan: true
