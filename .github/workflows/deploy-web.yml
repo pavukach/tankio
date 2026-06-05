@@ -13,7 +13,7 @@ concurrency:
 
   
 env:
-  GODOT_VERSION: 4.6
+  GODOT_VERSION: 4.6.3
   EXPORT_NAME: web
   PROJECT_PATH: .
 
@@ -22,7 +22,7 @@ jobs:
     name: Web Export
     runs-on: ubuntu-24.04  # Use 24.04 with godot 4
     container:
-      image: barichello/godot-ci:4.3
+      image: barichello/godot-ci:4.6.3
     steps:
       - name: Checkout
         uses: actions/checkout@v4
