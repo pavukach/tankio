@@ -1,169 +1,148 @@
-direction: down
+direction: right
 
-# Global & Networking
-Network: {
-  MultiplayerInit: {
-    shape: class
-    _start_server()
-    connect_to_server(ip, port)
-  }
+# ─── Tank Component Classes ────────────────────────────────────
 
-  NetConfig: {
-    shape: class
-    TICK_RATE: float
-    IP_ADDRESS: string
-    PORT: int
-  }
-
-  TankSpawner: {
-    shape: class
-    tank_entries: "Array[TankEntry]"
-    _player_tanks: Dictionary
-    setup()
-    _spawn_tank(data)
-    _on_spawn_requested(peer_id, index)
-  }
-
-  SyncTransform: {
-    shape: class
-    body: Node2D
-    target_pos: Vector2
-    target_rot: float
-    sync_transform(pos, rot)
-  }
-
-  NetworkBus: {
-    shape: class
-    spawn_requested(id, index): signal
-    spawned(id, path): signal
-  }
-
-  LocalBus: {
-    shape: class
-    health_updated(id, current, max): signal
-    reload_started(id, time): signal
-  }
-}
-
-# Tank System
-TankSystem: {
+TankRoot: {
   Tank: {
     shape: class
     hull: HullMovement
     turret: TurretMovement
     shooter: Shooter
     health: Health
-    input_reader: InputReader
+    input_reader: "InputReader (Node)"
+    max_health: float
+    find_in(node): "static Tank"
+    get_player_id(): int
     take_damage(amount)
     despawn()
   }
 
   HullMovement: {
     shape: class
+    "« RigidBody2D »"
     profile: HullMovementProfile
-    input: InputReader
+    input: "InputReader"
+    "ArmorPlate ×N"
+    "SyncTransform (Node2D)"
+    "PositionTracker (Node2D)"
+    "FollowPlayer (Camera2D)"
     _integrate_forces(state)
   }
 
   TurretMovement: {
     shape: class
+    "« Node2D »"
     profile: TurretMovementProfile
-    input: InputReader
+    input: "InputReader"
+    "SyncTransform (Node2D)"
+    _angular_velocity: float
+    _physics_process(delta)
   }
 
   Shooter: {
     shape: class
+    "« Node2D »"
     profile: ShooterProfile
-    muzzle: Marker2D
+    input: "InputReader"
+    muzzle: "Marker2D"
+    manager: ProjectileManager
+    _is_reloading: bool
     _fire()
     reload()
+    sync_reload(time)
   }
 
   Health: {
     shape: class
+    "« Node »"
     max_health: float
     current_health: float
-    damaged(amt, new): signal
-    died(): signal
     take_damage(amount)
     heal(amount)
+    damaged(signal)
+    died(signal)
   }
 
-  InputReader: {
+  ArmorPlate: {
     shape: class
-    move: Vector2i
-    mouse: Vector2
-    shooting: bool
-    send_input(move, mouse, shooting)
+    "« CollisionShape2D »"
+    thickness: float
+    apply_damage(amount)
+  }
+
+  PositionTracker: {
+    shape: class
+    "« Node2D »"
+    body: Node2D
+    max_history: int
+    get_position_at(time): Vector2
+  }
+
+  MovementHelper: {
+    shape: class
+    "static utility"
+    get_accel(input, cur, accel, friction, fn): float
+  }
+
+  TankEntry: {
+    shape: class
+    "« Resource »"
+    display_name: String
+    tank_scene: PackedScene
+    miniature: PackedScene
   }
 }
 
-# Projectile System
-ProjectileSystem: {
-  Projectile: {
-    shape: class
-    owner_id: int
-    profile: ProjectileProfile
-    setup(pos, angle, owner)
-    despawn()
-  }
+# ─── Data Profiles ─────────────────────────────────────────────
 
-  ProjectileManager: {
-    shape: class
-    projectile_scene: PackedScene
-    spawn(data)
-  }
-
-  HitResolver: {
-    shape: class
-    resolve(body, shape_idx, world, velocity, profile, \.\.\.)
-  }
-}
-
-# Profiles & Resources
 Profiles: {
-  HullMovementProfile: {shape: class; speed: float; turn_speed: float}
-  TurretMovementProfile: {shape: class; speed: float; use_angles: bool}
-  ShooterProfile: {shape: class; reload_time: float}
-  ProjectileProfile: {shape: class; damage: float; penetration: float}
+  HullMovementProfile: {
+    shape: class
+    "« Resource »"
+    speed: float
+    reverse_speed: float
+    acceleration: float
+    friction: float
+    turn_speed: float
+    turn_acceleration: float
+    turn_friction: float
+  }
+
+  TurretMovementProfile: {
+    shape: class
+    "« Resource »"
+    speed: float
+    acceleration: float
+    friction: float
+    use_angles: bool
+    max_angle_left: float
+    max_angle_right: float
+  }
+
+  ShooterProfile: {
+    shape: class
+    "« Resource »"
+    reload_time: float
+    projectile_scene: PackedScene
+  }
 }
 
-# Relationships
-TankSystem.Tank -> TankSystem.HullMovement: contains
-TankSystem.Tank -> TankSystem.TurretMovement: contains
-TankSystem.Tank -> TankSystem.Shooter: contains
-TankSystem.Tank -> TankSystem.Health: contains
-TankSystem.Tank -> TankSystem.InputReader: contains
+# ─── Composition (has-a) ───────────────────────────────────────
 
-TankSystem.HullMovement -> Profiles.HullMovementProfile: uses
-TankSystem.TurretMovement -> Profiles.TurretMovementProfile: uses
-TankSystem.Shooter -> Profiles.ShooterProfile: uses
-ProjectileSystem.Projectile -> Profiles.ProjectileProfile: uses
+TankRoot.Tank -> TankRoot.HullMovement: hull
+TankRoot.Tank -> TankRoot.TurretMovement: turret
+TankRoot.Tank -> TankRoot.Shooter: shooter
+TankRoot.Tank -> TankRoot.Health: health
+TankRoot.HullMovement -> TankRoot.ArmorPlate: armor plates
+TankRoot.HullMovement -> TankRoot.PositionTracker: tracks
 
-TankSystem.HullMovement -> TankSystem.InputReader: reads
-TankSystem.TurretMovement -> TankSystem.InputReader: reads
-TankSystem.Shooter -> TankSystem.InputReader: reads
+# ─── Profile Usage ─────────────────────────────────────────────
 
-Network.TankSpawner -> TankSystem.Tank: spawns
-ProjectileSystem.ProjectileManager -> ProjectileSystem.Projectile: spawns
-TankSystem.Shooter -> ProjectileSystem.ProjectileManager: requests spawn
+TankRoot.HullMovement -> Profiles.HullMovementProfile: profile
+TankRoot.TurretMovement -> Profiles.TurretMovementProfile: profile
+TankRoot.Shooter -> Profiles.ShooterProfile: profile
 
-ProjectileSystem.Projectile -> ProjectileSystem.HitResolver: uses to resolve
-ProjectileSystem.HitResolver -> TankSystem.Health: applies damage
-ProjectileSystem.HitResolver -> TankSystem.Tank: applies damage (via fallback)
+# ─── Utility Usage ─────────────────────────────────────────────
 
-Network.SyncTransform -> TankSystem.HullMovement: syncs (parent)
-
-# Inheritance from Godot Classes
-TankSystem.HullMovement -> RigidBody2D: extends
-TankSystem.TurretMovement -> Node2D: extends
-TankSystem.Tank -> Node2D: extends
-ProjectileSystem.Projectile -> Area2D: extends
-Network.TankSpawner -> MultiplayerSpawner: extends
-ProjectileSystem.ProjectileManager -> MultiplayerSpawner: extends
-TankSystem.InputReader -> Node: extends
-TankSystem.Health -> Node: extends
-Profiles.HullMovementProfile -> Resource: extends
-Profiles.TurretMovementProfile -> Resource: extends
-Profiles.ShooterProfile -> Resource: extends
-Profiles.ProjectileProfile -> Resource: extends
+TankRoot.HullMovement -> TankRoot.MovementHelper: uses
+TankRoot.TurretMovement -> TankRoot.MovementHelper: uses
