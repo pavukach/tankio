@@ -13,7 +13,7 @@ concurrency:
 
   
 env:
-  GODOT_VERSION: 4.3
+  GODOT_VERSION: 4.6
   EXPORT_NAME: web
   PROJECT_PATH: .
 
