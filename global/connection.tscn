@@ -6,7 +6,6 @@
 [node name="Connection" type="Node2D" unique_id=290928930]
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=13910037]
-layer = 1
 script = ExtResource("2_ui")
 
 [node name="Panel" type="Panel" parent="UI" unique_id=745806154]
@@ -16,12 +15,13 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -160.0
-offset_top = -100.0
-offset_right = 160.0
-offset_bottom = 100.0
+offset_top = -120.0
+offset_right = 240.0
+offset_bottom = 120.0
 
 [node name="VBox" type="VBoxContainer" parent="UI/Panel" unique_id=961352676]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
@@ -61,6 +61,27 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "4242"
+
+[node name="ProtocolRow" type="HBoxContainer" parent="UI/Panel/VBox" unique_id=1361561037]
+layout_mode = 2
+
+[node name="ProtocolLabel" type="Label" parent="UI/Panel/VBox/ProtocolRow" unique_id=713481681]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+text = "Protocol:"
+
+[node name="ProtocolOption" type="OptionButton" parent="UI/Panel/VBox/ProtocolRow" unique_id=944235779]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 10
+size_flags_vertical = 4
+size_flags_stretch_ratio = 1.5
+selected = 0
+item_count = 2
+popup/item_0/text = "wss"
+popup/item_0/id = 1
+popup/item_1/text = "ws"
+popup/item_1/id = 0
 
 [node name="Spacer" type="Control" parent="UI/Panel/VBox" unique_id=1749177997]
 custom_minimum_size = Vector2(0, 8)

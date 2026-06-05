@@ -3,6 +3,7 @@ extends CanvasLayer
 
 @onready var ip_input: LineEdit = %IPInput
 @onready var port_input: LineEdit = %PortInput
+@onready var protocol_option: OptionButton = %ProtocolOption
 @onready var connect_btn: Button = %ConnectBtn
 @onready var status_label: Label = %StatusLabel
 @onready var init_node: MultiplayerInit = %MultiplayerInit
@@ -17,11 +18,12 @@ func _on_connect_pressed() -> void:
 	status_label.text = "Connecting..."
 	var ip := ip_input.text.strip_edges()
 	var port := int(port_input.text.strip_edges())
+	var protocol := protocol_option.get_item_text(protocol_option.selected)
 	if port <= 0:
 		port = NetConfig.PORT
 	if ip.is_empty():
 		ip = NetConfig.IP_ADDRESS
-	init_node.connect_to_server(ip, port)
+	init_node.connect_to_server(ip, port, protocol)
 
 func _on_connected() -> void:
 	hide()
