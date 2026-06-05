@@ -1,6 +1,0 @@
-[gd_scene format=3 uid="uid://d0rpgy4ssb3g2"]
-
-[ext_resource type="Script" path="res://entities/projectile/hit_effect.gd" id="1_he"]
-
-[node name="HitEffect" type="Node2D"]
-script = ExtResource("1_he")
