@@ -8,17 +8,17 @@ signal tank_died()
 
 func request_spawn(tank_entry_index: int) -> void:
 	var ctx := get_parent() as PlayerContext
-	Network.send(1, ctx.network_id, PlayerContext.METHOD_SPAWN_REQUEST, [tank_entry_index])
+	NetManager.network.send(1, ctx.network_id, PlayerContext.METHOD_SPAWN_REQUEST, [tank_entry_index])
 
 
 func send_spawned(tank_path: NodePath) -> void:
 	var ctx := get_parent() as PlayerContext
-	Network.send(ctx.player_id, ctx.network_id, PlayerContext.METHOD_SPAWNED, [str(tank_path)])
+	NetManager.network.send(ctx.player_id, ctx.network_id, PlayerContext.METHOD_SPAWNED, [str(tank_path)])
 
 
 func send_died() -> void:
 	var ctx := get_parent() as PlayerContext
-	Network.send(ctx.player_id, ctx.network_id, PlayerContext.METHOD_DIED, [])
+	NetManager.network.send(ctx.player_id, ctx.network_id, PlayerContext.METHOD_DIED, [])
 
 
 func emit_spawn_requested(tank_entry_index: int) -> void:

@@ -13,7 +13,7 @@ func _start_server() -> void:
 		port = NetConfig.PORT
 	var ws := WebSocketMultiplayerPeer.new()
 	ws.create_server(port, "0.0.0.0")
-	Network.set_peer(ws, true)
+	NetManager.network.set_peer(ws, true)
 	print("Server started on 0.0.0.0:%d" % port)
 	_load_game.call_deferred()
 
@@ -29,8 +29,8 @@ func connect_to_server(ip: String, port: int, protocol: String = "wss") -> void:
 
 	var ws := WebSocketMultiplayerPeer.new()
 	ws.create_client("%s://%s:%d" % [protocol, ip, port])
-	Network.set_peer(ws, false)
-	Network.connected_to_server.connect(_on_connected, CONNECT_ONE_SHOT)
+	NetManager.network.set_peer(ws, false)
+	NetManager.network.connected_to_server.connect(_on_connected, CONNECT_ONE_SHOT)
 	print("Client connecting to %s://%s:%d" % [protocol, ip, port])
 
 func _load_game() -> void:

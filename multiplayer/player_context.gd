@@ -1,5 +1,5 @@
 class_name PlayerContext
-extends NetworkObject
+extends NetNode
 
 const METHOD_INPUT := 2
 const METHOD_SPAWN_REQUEST := 3
@@ -14,14 +14,14 @@ var _bus: NetworkBus
 
 
 func _ready() -> void:
-	network_id = Network.CONTEXT_BASE + player_id
-	Network.add_entity(network_id, self)
+	network_id = NetManager.network.CONTEXT_BASE + player_id
+	NetManager.network.add_entity(network_id, self)
 	super._ready()
 
 	_bus = NetworkBus.new()
 	add_child(_bus)
 
-	if Network.is_server():
+	if NetManager.network.is_server():
 		_input_reader = InputReader.new()
 		_input_reader.receiver = true
 		add_child(_input_reader)
@@ -68,17 +68,17 @@ func _receive_input(
 
 
 func _request_spawn(tank_entry_index: int) -> void:
-	if Network.is_server():
+	if NetManager.network.is_server():
 		_bus.emit_spawn_requested(tank_entry_index)
 
 
 func _on_tank_spawned(tank_path: String) -> void:
-	if not Network.is_server():
+	if not NetManager.network.is_server():
 		_bus.emit_tank_spawned(NodePath(tank_path))
 
 
 func _on_tank_died() -> void:
-	if not Network.is_server():
+	if not NetManager.network.is_server():
 		_bus.emit_tank_died()
 
 

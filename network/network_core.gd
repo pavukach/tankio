@@ -1,4 +1,5 @@
-extends Node
+class_name NetworkCore
+extends RefCounted
 
 const HEADER_SIZE := 5
 const CONTEXT_BASE := 100000
@@ -9,14 +10,14 @@ signal connected_to_server
 
 var peer: MultiplayerPeer
 var sender_id: int
-var _entities: Dictionary[int, Node] = {}
+var _entities: Dictionary[int, Object] = {}
 var _players: Array[int] = []
 var _ids := OrderedIndexBank.new()
 var _is_server := false
 var _connected_emitted := false
 var _connected_peers: Array[int] = []
 
-func _ready() -> void:
+func _init() -> void:
 	add_entity(acquire_id(), self)
 
 
@@ -68,7 +69,7 @@ func release_entity(id: int) -> void:
 	_ids.free_index(id)
 
 
-func _process(_delta: float) -> void:
+func poll(_delta: float) -> void:
 	if peer == null:
 		return
 
@@ -85,11 +86,11 @@ func _process(_delta: float) -> void:
 		_receive_packet()
 
 
-func add_entity(id: int, entity: Node) -> void:
+func add_entity(id: int, entity: Object) -> void:
 	_entities[id] = entity
 
 
-func get_entity(id: int) -> Node:
+func get_entity(id: int) -> Object:
 	return _entities.get(id)
 
 
@@ -106,7 +107,7 @@ func send(
 	if peer == null:
 		return
 
-	var entity: Node = _entities.get(entity_id)
+	var entity: Object = _entities.get(entity_id)
 
 	if entity == null:
 		push_error("Entity not found")
@@ -147,7 +148,7 @@ func _receive_packet() -> void:
 	var entity_id := buffer.get_u32()
 	var method_id := buffer.get_u8()
 
-	var entity: Node = _entities.get(entity_id)
+	var entity: Object = _entities.get(entity_id)
 
 	if entity == null:
 		return
@@ -164,7 +165,7 @@ func _receive_packet() -> void:
 
 
 func _call_network_method(
-	entity: Node,
+	entity: Object,
 	method_id: int,
 	payload: PackedByteArray,
 ) -> void:

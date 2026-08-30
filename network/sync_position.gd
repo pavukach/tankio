@@ -3,7 +3,7 @@ extends Node2D
 
 var _pos_x: NetSyncVar
 var _pos_y: NetSyncVar
-var _net: NetworkObject
+var _net: NetNode
 var _parent: Node2D
 
 var _seeded := false
@@ -16,7 +16,7 @@ var target_pos: Vector2:
 func _ready() -> void:
 	process_physics_priority = -64
 
-	_net = owner as NetworkObject
+	_net = owner as NetNode
 	_parent = get_parent() as Node2D
 
 	_pos_x = NetSyncVar.new(0.0, ByteData.Type.FLOAT)
@@ -27,7 +27,7 @@ func _ready() -> void:
 	_net.register_initial_var(_pos_x)
 	_net.register_initial_var(_pos_y)
 
-	if Network.is_server():
+	if NetManager.network.is_server():
 		_pos_x.set_value(_parent.global_position.x)
 		_pos_y.set_value(_parent.global_position.y)
 	else:
@@ -49,7 +49,7 @@ func _seed() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if Network.is_server():
+	if NetManager.network.is_server():
 		_pos_x.set_value(_parent.global_position.x)
 		_pos_y.set_value(_parent.global_position.y)
 		return

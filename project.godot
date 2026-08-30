@@ -17,9 +17,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Network="*res://network/network.gd"
-NetworkSpawner="*res://network/network_spawner.gd"
-NetInterest="*res://network/interest/net_interest.gd"
+NetManager="*res://network/net_manager.gd"
 LocalBus="*res://global/local_bus.gd"
 InputCapture="*res://player/input_reader.gd"
 Effects="*res://global/effects.gd"

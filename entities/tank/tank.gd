@@ -1,5 +1,5 @@
 class_name Tank
-extends NetworkObject
+extends NetNode
 
 @export var hull: HullMovement
 @export var turret: TurretMovement
@@ -15,7 +15,7 @@ func get_player_id() -> int:
 
 func _ready():
 	super._ready()
-	if Network.is_server():
+	if NetManager.network.is_server():
 		_setup_health()
 		var target := InterestTarget.new()
 		add_child(target)

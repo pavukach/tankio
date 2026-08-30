@@ -50,11 +50,11 @@ projectile_scene = ExtResource("12_v21y3")
 [node name="Tank2" type="Node2D" unique_id=1419671407 node_paths=PackedStringArray("hull", "turret", "shooter", "health")]
 unique_name_in_owner = true
 script = ExtResource("1_tank")
-max_health = 120.0
 hull = NodePath("Hull")
 turret = NodePath("Hull/Turret")
 shooter = NodePath("Hull/Turret/Shooter")
 health = NodePath("Health")
+max_health = 120.0
 
 [node name="Hull" type="RigidBody2D" parent="." unique_id=721018435]
 gravity_scale = 0.0

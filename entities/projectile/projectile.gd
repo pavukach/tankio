@@ -10,7 +10,7 @@ var _previous_position := Vector2.ZERO
 var _despawning := false
 var _hit_handled := false
 
-var net: NetworkObject
+var net: NetNode
 var _rot: NetSyncVar
 
 @export var profile: ProjectileProfile
@@ -19,7 +19,7 @@ var _rot: NetSyncVar
 
 
 func _ready() -> void:
-	net = owner as NetworkObject
+	net = owner as NetNode
 	_rot = NetSyncVar.new(rotation, ByteData.Type.FLOAT)
 	net.register_var(_rot)
 	net.register_initial_var(_rot)
@@ -28,10 +28,10 @@ func _ready() -> void:
 		[ByteData.Type.FLOAT, ByteData.Type.FLOAT, ByteData.Type.BYTE],
 		true,
 	)
-	if not Network.is_server():
+	if not NetManager.network.is_server():
 		_rot.changed.connect(_on_rot_changed)
 	hitbox.body_shape_entered.connect(_handle_body_collision)
-	if not Network.is_server():
+	if not NetManager.network.is_server():
 		hitbox.monitoring = false
 		hitbox.monitorable = false
 
@@ -41,7 +41,7 @@ func _on_rot_changed() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if not Network.is_server():
+	if not NetManager.network.is_server():
 		return
 	_previous_position = net.global_position
 	_lifetime_timer += delta
@@ -66,7 +66,7 @@ func setup(
 
 
 func _handle_body_collision(_body_rid: RID, body: Node2D, body_shape_index: int, _local_shape_index: int) -> void:
-	if not Network.is_server() or _despawning or _hit_handled or not is_instance_valid(body):
+	if not NetManager.network.is_server() or _despawning or _hit_handled or not is_instance_valid(body):
 		return
 	if body.is_in_group(str(net.owner_id)):
 		return
@@ -83,7 +83,7 @@ func _handle_body_collision(_body_rid: RID, body: Node2D, body_shape_index: int,
 
 	_despawning = true
 	Effects.spawn_hit_effect(result.hit_pos, result.penetrated)
-	NetInterest.send(
+	NetManager.interest.send(
 		net.network_id,
 		METHOD_HIT_EFFECT,
 		[result.hit_pos.x, result.hit_pos.y, 1 if result.penetrated else 0],
@@ -93,7 +93,7 @@ func _handle_body_collision(_body_rid: RID, body: Node2D, body_shape_index: int,
 
 func _request_despawn() -> void:
 	_despawning = true
-	if Network.is_server():
+	if NetManager.network.is_server():
 		net.destroy()
 
 

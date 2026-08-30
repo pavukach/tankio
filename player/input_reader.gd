@@ -20,7 +20,7 @@ var _active := false
 func _ready() -> void:
 	if receiver:
 		return
-	if Network.is_server():
+	if NetManager.network.is_server():
 		process_mode = Node.PROCESS_MODE_DISABLED
 		return
 	LocalBus.local_player_spawned.connect(_on_local_player_spawned)
@@ -44,9 +44,9 @@ func apply_remote(
 
 
 func _process(_delta: float) -> void:
-	if receiver or Network.is_server() or not _active:
+	if receiver or NetManager.network.is_server() or not _active:
 		return
-	if Network.peer == null or Network.peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
+	if NetManager.network.peer == null or NetManager.network.peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
 		return
 
 	move.x = int(Input.is_action_pressed("player_right")) - int(Input.is_action_pressed("player_left"))
@@ -59,10 +59,10 @@ func _process(_delta: float) -> void:
 	if camera:
 		mouse = camera.get_global_mouse_position()
 
-	if not Network.is_server():
-		Network.send(
+	if not NetManager.network.is_server():
+		NetManager.network.send(
 			1,
-			Network.CONTEXT_BASE + Network.peer.get_unique_id(),
+			NetManager.network.CONTEXT_BASE + NetManager.network.peer.get_unique_id(),
 			PlayerContext.METHOD_INPUT,
 			[move.x, move.y, mouse.x, mouse.y, 1 if shooting else 0, 1 if ability else 0],
 		)

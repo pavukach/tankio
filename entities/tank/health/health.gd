@@ -7,7 +7,7 @@ signal health_changed(new_health: float)
 
 @export var max_health: float = 100.0
 
-var _net: NetworkObject
+var _net: NetNode
 var net_health: NetSyncVar
 
 var _current_health: float
@@ -16,7 +16,7 @@ var current_health: float:
 	get: return _current_health
 
 func _ready() -> void:
-	_net = owner as NetworkObject
+	_net = owner as NetNode
 	_current_health = max_health
 	net_health = NetSyncVar.new(max_health, ByteData.Type.FLOAT)
 	_net.register_reliable_var(net_health)
@@ -31,7 +31,7 @@ func _relay_health_changed(_new_health: float) -> void:
 	LocalBus.health_updated.emit(_net.owner_id, _current_health, max_health)
 
 func take_damage(amount: float) -> void:
-	if not Network.is_server():
+	if not NetManager.network.is_server():
 		return
 
 	_current_health = max(0.0, _current_health - amount)
@@ -43,7 +43,7 @@ func take_damage(amount: float) -> void:
 		died.emit()
 
 func heal(amount: float) -> void:
-	if not Network.is_server():
+	if not NetManager.network.is_server():
 		return
 
 	_current_health = min(max_health, _current_health + amount)

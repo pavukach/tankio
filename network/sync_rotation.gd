@@ -4,7 +4,7 @@ extends Node2D
 @export var use_local_rotation := false
 
 var _rot: NetSyncVar
-var _net: NetworkObject
+var _net: NetNode
 var _parent: Node2D
 
 var _seeded := false
@@ -17,7 +17,7 @@ var target_rot: float:
 func _ready() -> void:
 	process_physics_priority = -64
 
-	_net = owner as NetworkObject
+	_net = owner as NetNode
 	_parent = get_parent() as Node2D
 
 	_rot = NetSyncVar.new(0.0, ByteData.Type.FLOAT)
@@ -25,7 +25,7 @@ func _ready() -> void:
 	_net.register_var(_rot)
 	_net.register_initial_var(_rot)
 
-	if Network.is_server():
+	if NetManager.network.is_server():
 		_rot.set_value(_parent.rotation if use_local_rotation else _parent.global_rotation)
 	else:
 		_rot.changed.connect(_on_changed)
@@ -40,7 +40,7 @@ func _on_changed() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if Network.is_server():
+	if NetManager.network.is_server():
 		_rot.set_value(_parent.rotation if use_local_rotation else _parent.global_rotation)
 		return
 

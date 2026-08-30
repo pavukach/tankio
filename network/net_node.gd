@@ -1,4 +1,4 @@
-class_name NetworkObject
+class_name NetNode
 extends Node2D
 
 var network_id: int
@@ -23,16 +23,16 @@ func _init() -> void:
 
 
 func _ready() -> void:
-	created.connect(NetInterest.on_entity_created.bind(self))
-	destroyed.connect(NetInterest.on_entity_destroyed.bind(self))
-	destroyed.connect(func(): if Network.is_server(): Network.release_entity(network_id))
+	created.connect(NetManager.interest.on_entity_created.bind(self))
+	destroyed.connect(NetManager.interest.on_entity_destroyed.bind(self))
+	destroyed.connect(func(): if NetManager.network.is_server(): NetManager.network.release_entity(network_id))
 	created.emit()
 
 
 func _physics_process(_delta: float) -> void:
-	if not Network.is_server() or not network_vars:
+	if not NetManager.network.is_server() or not network_vars:
 		return
-	NetInterest.send(network_id, 1, network_vars.map(func(v): return v.get_value()))
+	NetManager.interest.send(network_id, 1, network_vars.map(func(v): return v.get_value()))
 
 
 func _on_create(...args: Array) -> void:
@@ -51,9 +51,9 @@ func register_reliable_var(variable: NetSyncVar) -> void:
 	network_methods.append(NetFunc.new(variable.set_value, [variable.get_type()], true))
 	network_reliable_vars.append(variable)
 	network_reliable_var_indices.append(index)
-	if not Network.is_server():
+	if not NetManager.network.is_server():
 		return
-	variable.changed.connect(func(): NetInterest.send(network_id, index, [variable.get_value()]))
+	variable.changed.connect(func(): NetManager.interest.send(network_id, index, [variable.get_value()]))
 
 
 func register_var(variable: NetVar) -> void:
@@ -73,14 +73,14 @@ func update_initial(player_id: int) -> void:
 	var initial_values: Array = []
 	for v in network_initial_vars:
 		initial_values.append(v.get_value())
-	Network.send(player_id, network_id, 0, initial_values)
+	NetManager.network.send(player_id, network_id, 0, initial_values)
 
 
 func update_reliable(player_id: int) -> void:
 	for i in range(network_reliable_vars.size()):
 		if network_reliable_vars[i].is_initial():
 			continue
-		Network.send(player_id, network_id, network_reliable_var_indices[i], [network_reliable_vars[i].get_value()])
+		NetManager.network.send(player_id, network_id, network_reliable_var_indices[i], [network_reliable_vars[i].get_value()])
 
 
 func destroy() -> void:

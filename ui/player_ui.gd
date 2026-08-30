@@ -23,7 +23,7 @@ func initialize():
 
 
 func _local_context() -> PlayerContext:
-	return Network.get_entity(Network.CONTEXT_BASE + Network.peer.get_unique_id()) as PlayerContext
+	return NetManager.network.get_entity(NetManager.network.CONTEXT_BASE + NetManager.network.peer.get_unique_id()) as PlayerContext
 
 func _on_tank_selected(index: int):
 	_selector.hide()
@@ -34,7 +34,7 @@ func _on_tank_selected(index: int):
 func _on_tank_spawned(_tank_path: NodePath):
 	if _tank and is_instance_valid(_tank):
 		_tank.queue_free()
-	var local_id := Network.local_id()
+	var local_id := NetManager.network.local_id()
 	for node in get_tree().get_nodes_in_group(str(local_id)):
 		if node is Tank:
 			_tank = node

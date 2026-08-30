@@ -1,15 +1,32 @@
-extends AutoloadNetworkObject
+class_name NetSpawner
+extends RefCounted
+
+var _network: NetworkCore
+var _manager: NetManager
+
+var network_id: int
+var network_methods: Array[NetFunc]
 
 var world: Node
 @export var entities: Array[PackedScene]
 
-
 var scene_to_index: Dictionary = {}
+
+
+func _init(p_network: NetworkCore, p_manager: NetManager) -> void:
+	_network = p_network
+	_manager = p_manager
+	network_id = _network.acquire_id()
+	_network.add_entity(network_id, self)
+	network_methods = [
+		NetFunc.new(_spawn_remote, [ByteData.Type.UINT, ByteData.Type.UINT, ByteData.Type.UINT], true),
+		NetFunc.new(_despawn_remote, [ByteData.Type.UINT], true),
+	]
 
 
 func _world() -> Node:
 	if world == null or not is_instance_valid(world):
-		world = get_node("/root/Game/World")
+		world = _manager.get_node("/root/Game/World")
 	return world
 
 
@@ -23,25 +40,17 @@ func rebuild_index() -> void:
 		scene_to_index[entities[i].resource_path] = i
 
 
-func _ready() -> void:
-	super._ready()
-	network_methods = [
-		NetFunc.new(_spawn_remote, [ByteData.Type.UINT, ByteData.Type.UINT, ByteData.Type.UINT], true),
-		NetFunc.new(_despawn_remote, [ByteData.Type.UINT], true),
-	]
-
-
-func spawn(entity_index: int, initial_transform := Transform2D.IDENTITY) -> NetworkObject:
-	if not Network.is_server():
+func spawn(entity_index: int, initial_transform := Transform2D.IDENTITY) -> NetNode:
+	if not _network.is_server():
 		push_error("Can only spawn entities on the server")
 		return null
 	var entity = entities[entity_index].instantiate()
 
-	if entity is not NetworkObject:
+	if entity is not NetNode:
 		push_error("Can only spawn NetworkObjects")
 		return null
-	var id := Network.acquire_id()
-	Network.add_entity(id, entity)
+	var id := _network.acquire_id()
+	_network.add_entity(id, entity)
 	entity.network_id = id
 	entity.network_type = entity_index
 	entity.transform = initial_transform
@@ -54,15 +63,15 @@ func _spawn_remote(entity_id: int, index: int, owner_id: int) -> void:
 	entity.network_id = entity_id
 	entity.network_type = index
 	entity.owner_id = owner_id
-	Network.add_entity(entity_id, entity)
+	_network.add_entity(entity_id, entity)
 	entity.add_to_group(str(owner_id))
 	entity.set_meta("peer_id", owner_id)
 	_world().add_child(entity)
 
 
 func _despawn_remote(entity_id: int) -> void:
-	var entity = Network.get_entity(entity_id)
+	var entity = _network.get_entity(entity_id)
 	if entity == null or entity.is_queued_for_deletion():
 		return
-	Network.remove_entity(entity_id)
+	_network.remove_entity(entity_id)
 	entity.queue_free()

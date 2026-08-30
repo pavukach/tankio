@@ -29,11 +29,11 @@ func _ready():
 		scenes.append(entry.tank_scene)
 	for proj in PROJECTILE_SCENES:
 		scenes.append(proj)
-	NetworkSpawner.entities = scenes
-	NetworkSpawner.rebuild_index()
+	NetManager.spawner.entities = scenes
+	NetManager.spawner.rebuild_index()
 
-	if Network.is_server():
-		Network.peer_disconnected.connect(_on_peer_disconnected)
+	if NetManager.network.is_server():
+		NetManager.network.peer_disconnected.connect(_on_peer_disconnected)
 
 
 func setup():
@@ -75,7 +75,7 @@ func _on_spawn_requested(peer_id: int, tank_entry_index: int) -> void:
 		else:
 			spawn_position = old_tank.position
 			spawn_rotation = old_tank.rotation
-		if old_tank is NetworkObject:
+		if old_tank is NetNode:
 			old_tank.destroy()
 		else:
 			old_tank.queue_free()
@@ -84,14 +84,14 @@ func _on_spawn_requested(peer_id: int, tank_entry_index: int) -> void:
 		spawn_position = spawn_point.position
 		spawn_rotation = spawn_point.rotation
 
-	var tank := NetworkSpawner.spawn(tank_entry_index, Transform2D(spawn_rotation, spawn_position))
+	var tank := NetManager.spawner.spawn(tank_entry_index, Transform2D(spawn_rotation, spawn_position))
 	if not tank:
 		return
 	_configure_tank(tank, peer_id)
-	NetInterest.start_tracking(tank.network_id, peer_id)
+	NetManager.interest.start_tracking(tank.network_id, peer_id)
 	_player_tanks[peer_id] = tank
 
-	var ctx := Network.get_entity(Network.CONTEXT_BASE + peer_id) as PlayerContext
+	var ctx := NetManager.network.get_entity(NetManager.network.CONTEXT_BASE + peer_id) as PlayerContext
 	if ctx:
 		ctx.attach_tank(tank)
 		ctx.notify_spawned(tank.get_path())
@@ -111,10 +111,10 @@ func _on_peer_disconnected(peer_id: int) -> void:
 func _on_tank_died(tank: Node2D) -> void:
 	var peer_id := tank.get_meta("peer_id") as int
 	_player_tanks.erase(peer_id)
-	var ctx := Network.get_entity(Network.CONTEXT_BASE + peer_id) as PlayerContext
+	var ctx := NetManager.network.get_entity(NetManager.network.CONTEXT_BASE + peer_id) as PlayerContext
 	if ctx:
 		ctx.notify_died()
-	if tank is NetworkObject:
+	if tank is NetNode:
 		tank.destroy()
 	else:
 		tank.queue_free()

@@ -5,9 +5,9 @@ var entity_id: int
 
 
 func _ready():
-	var net_obj: NetworkObject = owner as NetworkObject
+	var net_obj: NetNode = owner as NetNode
 	if net_obj == null:
-		net_obj = get_parent() as NetworkObject
+		net_obj = get_parent() as NetNode
 	entity_id = net_obj.network_id
 	var collider := CollisionShape2D.new()
 	var shape := CircleShape2D.new()
@@ -24,7 +24,7 @@ func _ready():
 	area_exited.connect(_on_area_exited)
 
 func _on_area_entered(area: Area2D) -> void:
-	if not Network.is_server():
+	if not NetManager.network.is_server():
 		return
 	if area is not InterestZone:
 		return
@@ -33,10 +33,10 @@ func _on_area_entered(area: Area2D) -> void:
 	if zone.type != InterestZone.Type.SPAWN:
 		return
 
-	NetInterest.start_tracking(entity_id, zone.player_id)
+	NetManager.interest.start_tracking(entity_id, zone.player_id)
 
 func _on_area_exited(area: Area2D) -> void:
-	if not Network.is_server():
+	if not NetManager.network.is_server():
 		return
 	if area is not InterestZone:
 		return
@@ -45,4 +45,4 @@ func _on_area_exited(area: Area2D) -> void:
 	if zone.type != InterestZone.Type.DESPAWN:
 		return
 
-	NetInterest.stop_tracking(entity_id, zone.player_id)
+	NetManager.interest.stop_tracking(entity_id, zone.player_id)

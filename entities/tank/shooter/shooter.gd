@@ -5,7 +5,7 @@ extends Node2D
 @export var profile: ShooterProfile
 @export var muzzle: Marker2D
 
-var _net: NetworkObject
+var _net: NetNode
 var _reload_var: NetSyncVar
 var _proj_index: int
 
@@ -14,17 +14,17 @@ var _reload_timer := 0.0
 
 
 func _ready() -> void:
-	_net = owner as NetworkObject
+	_net = owner as NetNode
 	_reload_var = NetSyncVar.new(0.0, ByteData.Type.FLOAT)
 	_net.register_reliable_var(_reload_var)
 	_reload_var.changed.connect(_on_reload_var_changed)
-	_proj_index = NetworkSpawner.index_of_scene(profile.projectile_scene)
-	if not Network.is_server():
+	_proj_index = NetManager.spawner.index_of_scene(profile.projectile_scene)
+	if not NetManager.network.is_server():
 		process_mode = Node.PROCESS_MODE_DISABLED
 
 
 func _physics_process(_delta: float) -> void:
-	if not Network.is_server() or not input:
+	if not NetManager.network.is_server() or not input:
 		return
 
 	if _is_reloading:
@@ -41,7 +41,7 @@ func _fire() -> void:
 	var spawn_pos := muzzle.global_position
 	var angle := global_rotation
 	var owner_id := _net.owner_id
-	var entity := NetworkSpawner.spawn(_proj_index)
+	var entity := NetManager.spawner.spawn(_proj_index)
 	var projectile := entity.find_child("Projectile", true, false) as Projectile
 	projectile.setup(spawn_pos, angle, owner_id)
 	reload()
