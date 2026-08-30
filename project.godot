@@ -12,16 +12,19 @@ config_version=5
 
 config/name="tankio"
 run/main_scene="uid://dt4t2tfbda38i"
-config/features=PackedStringArray("4.6", "GL Compatibility")
+config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
-NetworkBus="*res://global/network_bus.gd"
+Network="*res://network/network.gd"
+NetworkSpawner="*res://network/network_spawner.gd"
+NetInterest="*res://network/interest/net_interest.gd"
 LocalBus="*res://global/local_bus.gd"
+InputCapture="*res://player/input_reader.gd"
+Effects="*res://global/effects.gd"
 TankSpawner="*res://multiplayer/tank_spawner.gd"
-
-ProjManager="*res://entities/projectile/projectile_manager.gd"
+PlayerConnectionManager="*res://multiplayer/player_connection_manager.gd"
 
 [input]
 

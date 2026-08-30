@@ -6,9 +6,11 @@ class_name HullMovement extends RigidBody2D
 func _ready():
 	angular_damp = 0
 	linear_damp = 0
+	if not Network.is_server():
+		freeze = true
 
 func _integrate_forces(state):
-	if not is_multiplayer_authority():
+	if not Network.is_server() or not is_instance_valid(input):
 		return
 
 	_move(state)

@@ -1,28 +1,27 @@
-class_name MultiplayerInit
+class_name NetworkInit
 extends Node
 
 func _ready():
 	if OS.has_feature("web"):
 		return
-	var args := Array(OS.get_cmdline_args())
-	if args.has("--server"):
+	if OS.get_environment("TANKIO_SERVER") == "1":
 		_start_server()
 
 func _start_server() -> void:
-	var port := _parse_port_arg()
+	var port := _parse_port()
 	if port < 0:
 		port = NetConfig.PORT
 	var ws := WebSocketMultiplayerPeer.new()
 	ws.create_server(port, "0.0.0.0")
-	multiplayer.multiplayer_peer = ws
+	Network.set_peer(ws, true)
 	print("Server started on 0.0.0.0:%d" % port)
 	_load_game.call_deferred()
 
-func _parse_port_arg() -> int:
-	for arg in OS.get_cmdline_args():
-		if arg.begins_with("--port="):
-			return int(arg.substr(7).strip_edges())
-	return -1
+func _parse_port() -> int:
+	var p := OS.get_environment("TANKIO_PORT")
+	if p.is_empty():
+		return -1
+	return int(p.strip_edges())
 
 func connect_to_server(ip: String, port: int, protocol: String = "wss") -> void:
 	_load_game()
@@ -30,8 +29,8 @@ func connect_to_server(ip: String, port: int, protocol: String = "wss") -> void:
 
 	var ws := WebSocketMultiplayerPeer.new()
 	ws.create_client("%s://%s:%d" % [protocol, ip, port])
-	multiplayer.multiplayer_peer = ws
-	multiplayer.connected_to_server.connect(_on_connected, CONNECT_ONE_SHOT)
+	Network.set_peer(ws, false)
+	Network.connected_to_server.connect(_on_connected, CONNECT_ONE_SHOT)
 	print("Client connecting to %s://%s:%d" % [protocol, ip, port])
 
 func _load_game() -> void:

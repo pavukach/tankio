@@ -13,13 +13,13 @@ trap cleanup EXIT INT TERM
 
 mkdir -p logs
 
-godot --server --headless &> logs/server-log.txt &
+TANKIO_SERVER=1 godot --headless &>> logs/run.log &
 pids+=($!)
 
-godot &> logs/client1-log.txt &
+godot &>> logs/run.log &
 pids+=($!)
 
-godot &> logs/client2-log.txt &
+godot &>> logs/run.log &
 pids+=($!)
 
 wait

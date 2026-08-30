@@ -1,10 +1,12 @@
 class_name FollowPlayer
 extends Camera2D
 
+var _parent: Node2D
+
 func _ready():
-	var tank := Tank.find_in(self)
+	var tank := owner as Tank
 	var player_id := tank.get_player_id() if tank else 0
-	if multiplayer.get_unique_id() != player_id:
+	if Network.local_id() != player_id:
 		enabled = false
 		return
 	
@@ -12,14 +14,15 @@ func _ready():
 	make_current()
 	print("follow player")
 	top_level = true
+	_parent = get_parent() as Node2D
 
 func _process(_delta):
 	if not enabled:
 		return
 		
-	if not is_instance_valid(get_parent()):
+	if not is_instance_valid(_parent):
 		queue_free()
 		return
 	
-	global_position = get_parent().global_position
+	global_position = _parent.global_position
 	global_rotation = 0

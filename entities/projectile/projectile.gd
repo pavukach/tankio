@@ -1,7 +1,8 @@
 class_name Projectile
-extends Area2D
+extends Node2D
 
-var owner_id: int
+const METHOD_HIT_EFFECT := 2
+
 var _velocity := Vector2.ZERO
 var _lifetime := 5.0
 var _lifetime_timer := 0.0
@@ -9,23 +10,45 @@ var _previous_position := Vector2.ZERO
 var _despawning := false
 var _hit_handled := false
 
+var net: NetworkObject
+var _rot: NetSyncVar
+
 @export var profile: ProjectileProfile
 
-func _ready():
-	body_shape_entered.connect(_handle_body_collision)
-	if not is_multiplayer_authority():
-		monitoring = false
-		monitorable = false
+@onready var hitbox := $Hitbox
+
+
+func _ready() -> void:
+	net = owner as NetworkObject
+	_rot = NetSyncVar.new(rotation, ByteData.Type.FLOAT)
+	net.register_var(_rot)
+	net.register_initial_var(_rot)
+	net.register_method(
+		_on_hit_effect,
+		[ByteData.Type.FLOAT, ByteData.Type.FLOAT, ByteData.Type.BYTE],
+		true,
+	)
+	if not Network.is_server():
+		_rot.changed.connect(_on_rot_changed)
+	hitbox.body_shape_entered.connect(_handle_body_collision)
+	if not Network.is_server():
+		hitbox.monitoring = false
+		hitbox.monitorable = false
+
+
+func _on_rot_changed() -> void:
+	rotation = _rot.get_value()
 
 
 func _physics_process(delta: float) -> void:
-	if is_multiplayer_authority():
-		_previous_position = global_position
-		_lifetime_timer += delta
-		if _lifetime_timer >= _lifetime:
-			rpc("despawn")
-			return
-		position += _velocity * delta
+	if not Network.is_server():
+		return
+	_previous_position = net.global_position
+	_lifetime_timer += delta
+	if _lifetime_timer >= _lifetime:
+		_request_despawn()
+		return
+	net.global_position += _velocity * delta
 
 
 func setup(
@@ -33,18 +56,19 @@ func setup(
 	angle: float,
 	p_owner_id: int,
 ) -> void:
-	position = from_pos
+	net.global_position = from_pos
+	net.owner_id = p_owner_id
+	_rot.set_value(angle)
 	rotation = angle
 	_velocity = Vector2.from_angle(angle - PI / 2) * profile.speed
-	owner_id = p_owner_id
 	_lifetime = profile.lifetime
 	_previous_position = from_pos
 
 
 func _handle_body_collision(_body_rid: RID, body: Node2D, body_shape_index: int, _local_shape_index: int) -> void:
-	if _despawning or _hit_handled or not is_instance_valid(body):
+	if not Network.is_server() or _despawning or _hit_handled or not is_instance_valid(body):
 		return
-	if body.is_in_group(str(owner_id)):
+	if body.is_in_group(str(net.owner_id)):
 		return
 
 	_hit_handled = true
@@ -52,25 +76,26 @@ func _handle_body_collision(_body_rid: RID, body: Node2D, body_shape_index: int,
 	var result: Dictionary = HitResolver.resolve(
 		body, body_shape_index,
 		get_world_2d(), _velocity, profile, _lifetime_timer,
-		_previous_position, global_position,
+		_previous_position, net.global_position,
 	)
 	if not result.handled:
 		return
 
 	_despawning = true
-	rpc("hit_effect", result.hit_pos, result.penetrated)
-	rpc("despawn")
+	Effects.spawn_hit_effect(result.hit_pos, result.penetrated)
+	NetInterest.send(
+		net.network_id,
+		METHOD_HIT_EFFECT,
+		[result.hit_pos.x, result.hit_pos.y, 1 if result.penetrated else 0],
+	)
+	_request_despawn()
 
 
-@rpc("authority", "call_remote", "reliable")
-func hit_effect(pos: Vector2, penetrated_hit: bool):
-	var effect: Node2D = preload("res://entities/projectile/hit_effect.tscn").instantiate()
-	effect.position = pos
-	effect.penetrated = penetrated_hit
-	ProjManager.add_child(effect)
-
-
-@rpc("authority", "call_local", "reliable")
-func despawn():
+func _request_despawn() -> void:
 	_despawning = true
-	call_deferred("queue_free")
+	if Network.is_server():
+		net.destroy()
+
+
+func _on_hit_effect(x: float, y: float, penetrated: int) -> void:
+	Effects.spawn_hit_effect(Vector2(x, y), penetrated != 0)

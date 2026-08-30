@@ -1,38 +1,10 @@
 [gd_scene format=3 uid="uid://61o2kgruhyte"]
 
 [ext_resource type="Script" uid="uid://bm1snl1ok1217" path="res://global/game.gd" id="1_game"]
-[ext_resource type="Script" uid="uid://b8tog702vxrhq" path="res://entities/projectile/projectile.gd" id="3_5bs8x"]
 [ext_resource type="Texture2D" uid="uid://bjtb0dbydgoit" path="res://icon.svg" id="4_do21b"]
-[ext_resource type="Script" uid="uid://yhk7lwkqec5b" path="res://entities/projectile/projectile_profile.gd" id="4_eyeo0"]
-[ext_resource type="Script" uid="uid://bea7xsh1jyg0n" path="res://entities/projectile/projectile_manager.gd" id="5_proj_mgr"]
 [ext_resource type="Texture2D" uid="uid://4c53a54dyaib" path="res://global/background.png" id="6_gsc3t"]
-[ext_resource type="Script" uid="uid://bmna402ylpwx6" path="res://multiplayer/sync_transform.gd" id="6_n2dpw"]
 [ext_resource type="PackedScene" uid="uid://cvbujw6v37sbs" path="res://ui/player_ui.tscn" id="6_player_ui"]
-
-[sub_resource type="Resource" id="Resource_proj"]
-script = ExtResource("4_eyeo0")
-lifetime = 3.0
-penetration = 75.0
-decay_rate = 25.0
-normalization = 5.0
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_proj"]
-radius = 8.0
-
-[sub_resource type="PackedScene" id="PackedScene_3jcm0"]
-_bundled = {
-"conn_count": 0,
-"conns": PackedInt32Array(),
-"editable_instances": [],
-"id_paths": [PackedInt32Array(), PackedInt32Array(), PackedInt32Array()],
-"names": PackedStringArray("Projectile", "Area2D", "z_index", "script", "profile", "CollisionShape2D", "CollisionShape2D", "shape", "Sprite2D", "Sprite2D", "scale", "texture", "SyncTransform", "Node2D", "script"),
-"node_count": 4,
-"node_ids": PackedInt32Array(17805090, 1419242651, 1619925124, 433994400),
-"node_paths": [NodePath("."), NodePath("."), NodePath(".")],
-"nodes": PackedInt32Array(-1, -1, 1, 0, -1, 3, 2, 0, 3, 1, 4, 2, 0, 1073741824, 0, 6, 5, -1, 1, 7, 3, 0, 1073741825, 0, 9, 8, -1, 2, 10, 4, 11, 5, 0, 1073741826, 0, 13, 12, -1, 1, 14, 6, 0),
-"variants": [2, ExtResource("3_5bs8x"), SubResource("Resource_proj"), SubResource("CircleShape2D_proj"), Vector2(0.1, 0.1), ExtResource("4_do21b"), ExtResource("6_n2dpw")],
-"version": 3
-}
+[ext_resource type="Script" path="res://player/input_reader.gd" id="7_input"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pf48g"]
 size = Vector2(128.76334, 127.30513)
@@ -40,10 +12,8 @@ size = Vector2(128.76334, 127.30513)
 [node name="Game" type="Node2D" unique_id=1755592772]
 script = ExtResource("1_game")
 
-[node name="ProjectileManager" type="MultiplayerSpawner" parent="." unique_id=900000000]
-spawn_path = NodePath(".")
-script = ExtResource("5_proj_mgr")
-projectile_scene = SubResource("PackedScene_3jcm0")
+[node name="InputCapture" type="Node" parent="." unique_id=1755592773]
+script = ExtResource("7_input")
 
 [node name="PlayerUI" parent="." unique_id=26122346 instance=ExtResource("6_player_ui")]
 

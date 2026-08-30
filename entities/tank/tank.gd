@@ -1,41 +1,32 @@
 class_name Tank
-extends Node2D
+extends NetworkObject
 
 @export var hull: HullMovement
 @export var turret: TurretMovement
 @export var shooter: Shooter
-@export var input_reader: InputReader
 @export var health: Health
 
 @export_range(1, 500) var max_health: float = 100.0
 
 var _health_component: Health
 
-static func find_in(node: Node) -> Tank:
-	var current := node.get_parent()
-	while current:
-		if current is Tank:
-			return current
-		current = current.get_parent()
-	return null
-
 func get_player_id() -> int:
-	return get_meta("peer_id") if has_meta("peer_id") else 0
+	return owner_id
 
 func _ready():
-	if is_multiplayer_authority():
+	super._ready()
+	if Network.is_server():
 		_setup_health()
-		_link_input()
+		var target := InterestTarget.new()
+		add_child(target)
 
-func _link_input():
-	if not input_reader:
-		return
+func attach_input(reader: InputReader) -> void:
 	if hull:
-		hull.input = input_reader
+		hull.input = reader
 	if turret:
-		turret.input = input_reader
+		turret.input = reader
 	if shooter:
-		shooter.input = input_reader
+		shooter.input = reader
 
 func _setup_health():
 	if health:
@@ -55,7 +46,3 @@ func take_damage(amount: float) -> void:
 	var h := get_health()
 	if h:
 		h.take_damage(amount)
-
-@rpc("authority", "call_local", "reliable")
-func despawn():
-	call_deferred("queue_free")

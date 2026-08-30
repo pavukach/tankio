@@ -6,7 +6,7 @@ extends Node2D
 var _angular_velocity := 0.0
 
 func _physics_process(delta: float) -> void:
-	if not is_multiplayer_authority() or not is_instance_valid(input):
+	if not Network.is_server() or not is_instance_valid(input):
 		return
 
 	var to_mouse := (input.mouse - global_position).normalized()

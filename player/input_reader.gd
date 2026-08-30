@@ -8,18 +8,45 @@ var ability := false
 
 var camera: Camera2D
 
-func _ready():
-	if not multiplayer.is_server() and not is_multiplayer_authority():
-		queue_free()
-		return
-	camera = get_viewport().get_camera_2d()
+# True when this instance is the authoritative receiver under a player's
+# PlayerContext (server side). False for the autoload capturer (client side).
+var receiver := false
+
+# Client capturer only samples input after the local player's tank has spawned
+# (so a camera exists). Activated by LocalBus.local_player_spawned.
+var _active := false
 
 
-func _process(_delta):
-	var mp := multiplayer.multiplayer_peer
-	if mp == null or mp.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
+func _ready() -> void:
+	if receiver:
 		return
-	if not is_multiplayer_authority():
+	if Network.is_server():
+		process_mode = Node.PROCESS_MODE_DISABLED
+		return
+	LocalBus.local_player_spawned.connect(_on_local_player_spawned)
+
+
+func _on_local_player_spawned(_tank: Tank) -> void:
+	_active = true
+
+
+func apply_remote(
+	move_x: int,
+	move_y: int,
+	peer_mouse: Vector2,
+	peer_shoot: bool,
+	peer_ability: bool,
+) -> void:
+	move = Vector2i(move_x, move_y)
+	mouse = peer_mouse
+	shooting = peer_shoot
+	ability = peer_ability
+
+
+func _process(_delta: float) -> void:
+	if receiver or Network.is_server() or not _active:
+		return
+	if Network.peer == null or Network.peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
 		return
 
 	move.x = int(Input.is_action_pressed("player_right")) - int(Input.is_action_pressed("player_left"))
@@ -27,15 +54,15 @@ func _process(_delta):
 	shooting = Input.is_action_pressed("player_shoot")
 	ability = Input.is_action_pressed("player_ability")
 
+	if camera == null:
+		camera = get_viewport().get_camera_2d()
 	if camera:
 		mouse = camera.get_global_mouse_position()
 
-	if not multiplayer.is_server():
-		rpc_id(1, "send_input", move, mouse, shooting, ability)
-
-@rpc("any_peer", "call_remote", "unreliable")
-func send_input(peer_move: Vector2, peer_mouse: Vector2, peer_shoot: bool, peer_ability: bool):
-	move = Vector2i(peer_move)
-	mouse = peer_mouse
-	shooting = peer_shoot
-	ability = peer_ability
+	if not Network.is_server():
+		Network.send(
+			1,
+			Network.CONTEXT_BASE + Network.peer.get_unique_id(),
+			PlayerContext.METHOD_INPUT,
+			[move.x, move.y, mouse.x, mouse.y, 1 if shooting else 0, 1 if ability else 0],
+		)

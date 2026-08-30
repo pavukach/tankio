@@ -14,19 +14,31 @@ func initialize():
 	_selector.tank_selected.connect(_on_tank_selected)
 	_selector.build(TankSpawner)
 
-	NetworkBus.tank_spawned.connect(_on_tank_spawned)
-	NetworkBus.tank_died.connect(_on_tank_died)
+	var ctx := _local_context()
+	if ctx:
+		ctx._bus.tank_spawned.connect(_on_tank_spawned)
+		ctx._bus.tank_died.connect(_on_tank_died)
 	LocalBus.health_updated.connect(_on_health_updated)
 	LocalBus.reload_started.connect(_on_reload_started)
 
+
+func _local_context() -> PlayerContext:
+	return Network.get_entity(Network.CONTEXT_BASE + Network.peer.get_unique_id()) as PlayerContext
+
 func _on_tank_selected(index: int):
 	_selector.hide()
-	NetworkBus.request_spawn(index)
+	var ctx := _local_context()
+	if ctx:
+		ctx._bus.request_spawn(index)
 
-func _on_tank_spawned(tank_path: NodePath):
+func _on_tank_spawned(_tank_path: NodePath):
 	if _tank and is_instance_valid(_tank):
 		_tank.queue_free()
-	_tank = get_node(tank_path) as Node2D
+	var local_id := Network.local_id()
+	for node in get_tree().get_nodes_in_group(str(local_id)):
+		if node is Tank:
+			_tank = node
+			break
 	if not _tank:
 		return
 	_selector.hide()

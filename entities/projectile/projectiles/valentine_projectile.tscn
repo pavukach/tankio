@@ -1,12 +1,14 @@
-[gd_scene format=3 uid="uid://5vjivnufy8yo"]
+[gd_scene load_steps=7 format=3 uid="uid://5vjivnufy8yo"]
 
-[ext_resource type="Script" uid="uid://b8tog702vxrhq" path="res://entities/projectile/projectile.gd" id="1_pj32k"]
-[ext_resource type="Script" uid="uid://yhk7lwkqec5b" path="res://entities/projectile/projectile_profile.gd" id="2_proj"]
-[ext_resource type="Texture2D" uid="uid://bjtb0dbydgoit" path="res://icon.svg" id="3_icon"]
-[ext_resource type="Script" uid="uid://bmna402ylpwx6" path="res://multiplayer/sync_transform.gd" id="4_sync"]
+[ext_resource type="Script" path="res://network/network_object.gd" id="1_net"]
+[ext_resource type="Script" uid="uid://b8tog702vxrhq" path="res://entities/projectile/projectile.gd" id="2_pj"]
+[ext_resource type="Script" uid="uid://yhk7lwkqec5b" path="res://entities/projectile/projectile_profile.gd" id="3_prof"]
+[ext_resource type="Texture2D" uid="uid://bjtb0dbydgoit" path="res://icon.svg" id="4_icon"]
+[ext_resource type="Script" path="res://network/sync_position.gd" id="5_pos"]
+[ext_resource type="Script" path="res://network/interest/interest_target.gd" id="6_it"]
 
-[sub_resource type="Resource" id="Resource_proj"]
-script = ExtResource("2_proj")
+[sub_resource type="Resource" id="Resource_prof"]
+script = ExtResource("3_prof")
 speed = 800.0
 lifetime = 2.5
 penetration = 65.0
@@ -16,17 +18,25 @@ normalization = 3.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_proj"]
 radius = 8.0
 
-[node name="Projectile" type="Area2D" unique_id=940429585]
-z_index = 2
-script = ExtResource("1_pj32k")
-profile = SubResource("Resource_proj")
+[node name="Entity" type="Node2D"]
+script = ExtResource("1_net")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1471969721]
+[node name="Projectile" type="Node2D" parent="."]
+z_index = 2
+script = ExtResource("2_pj")
+profile = SubResource("Resource_prof")
+
+[node name="Hitbox" type="Area2D" parent="Projectile"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Projectile/Hitbox"]
 shape = SubResource("CircleShape2D_proj")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=82518133]
+[node name="Sprite2D" type="Sprite2D" parent="Projectile"]
 scale = Vector2(0.1, 0.1)
-texture = ExtResource("3_icon")
+texture = ExtResource("4_icon")
 
-[node name="SyncTransform" type="Node2D" parent="." unique_id=461053246]
-script = ExtResource("4_sync")
+[node name="SyncPosition" type="Node2D" parent="."]
+script = ExtResource("5_pos")
+
+[node name="InterestTarget" type="Area2D" parent="."]
+script = ExtResource("6_it")

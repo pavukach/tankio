@@ -1,30 +1,33 @@
+class_name NetworkBus
 extends Node
 
 signal spawn_requested(peer_id: int, tank_entry_index: int)
 signal tank_spawned(tank_path: NodePath)
 signal tank_died()
 
-var local_player_id: int:
-	get:
-		return multiplayer.get_unique_id()
 
-func request_spawn(tank_entry_index: int):
-	rpc_id(1, "_on_request_spawn", tank_entry_index)
+func request_spawn(tank_entry_index: int) -> void:
+	var ctx := get_parent() as PlayerContext
+	Network.send(1, ctx.network_id, PlayerContext.METHOD_SPAWN_REQUEST, [tank_entry_index])
 
-func send_spawned(peer_id: int, tank_path: NodePath):
-	rpc_id(peer_id, "_on_tank_spawned", tank_path)
 
-func send_died(peer_id: int):
-	rpc_id(peer_id, "_on_tank_died")
+func send_spawned(tank_path: NodePath) -> void:
+	var ctx := get_parent() as PlayerContext
+	Network.send(ctx.player_id, ctx.network_id, PlayerContext.METHOD_SPAWNED, [str(tank_path)])
 
-@rpc("any_peer", "call_remote", "reliable")
-func _on_request_spawn(tank_entry_index: int):
-	spawn_requested.emit(multiplayer.get_remote_sender_id(), tank_entry_index)
 
-@rpc("authority", "call_remote", "reliable")
-func _on_tank_spawned(tank_path: NodePath):
+func send_died() -> void:
+	var ctx := get_parent() as PlayerContext
+	Network.send(ctx.player_id, ctx.network_id, PlayerContext.METHOD_DIED, [])
+
+
+func emit_spawn_requested(tank_entry_index: int) -> void:
+	spawn_requested.emit(get_parent().player_id, tank_entry_index)
+
+
+func emit_tank_spawned(tank_path: NodePath) -> void:
 	tank_spawned.emit(tank_path)
 
-@rpc("authority", "call_remote", "reliable")
-func _on_tank_died():
+
+func emit_tank_died() -> void:
 	tank_died.emit()

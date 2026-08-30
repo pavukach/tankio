@@ -5,26 +5,33 @@ extends Node2D
 @export var profile: ShooterProfile
 @export var muzzle: Marker2D
 
+var _net: NetworkObject
+var _reload_var: NetSyncVar
+var _proj_index: int
+
 var _is_reloading := false
 var _reload_timer := 0.0
-var _projectile_manager: ProjectileManager
 
-func _ready():
-	if not is_multiplayer_authority():
+
+func _ready() -> void:
+	_net = owner as NetworkObject
+	_reload_var = NetSyncVar.new(0.0, ByteData.Type.FLOAT)
+	_net.register_reliable_var(_reload_var)
+	_reload_var.changed.connect(_on_reload_var_changed)
+	_proj_index = NetworkSpawner.index_of_scene(profile.projectile_scene)
+	if not Network.is_server():
 		process_mode = Node.PROCESS_MODE_DISABLED
-		return
-	_projectile_manager = ProjManager
+
 
 func _physics_process(_delta: float) -> void:
-	if not is_multiplayer_authority() or not input:
+	if not Network.is_server() or not input:
 		return
 
-		
 	if _is_reloading:
 		_reload_timer -= _delta
 		if _reload_timer <= 0.0:
 			_is_reloading = false
-		return	
+		return
 
 	if input.shooting:
 		_fire()
@@ -33,26 +40,27 @@ func _physics_process(_delta: float) -> void:
 func _fire() -> void:
 	var spawn_pos := muzzle.global_position
 	var angle := global_rotation
-	var tank := Tank.find_in(self)
-	var owner_id := tank.get_player_id() if tank else 0
-	var scene_path := profile.projectile_scene.resource_path if profile and profile.projectile_scene else ""
-	var proj_data := ProjectileSpawnData.new(spawn_pos, angle, owner_id, scene_path)
-	_projectile_manager.spawn(proj_data.to_dict())
+	var owner_id := _net.owner_id
+	var entity := NetworkSpawner.spawn(_proj_index)
+	var projectile := entity.find_child("Projectile", true, false) as Projectile
+	projectile.setup(spawn_pos, angle, owner_id)
 	reload()
 
 
 func reload() -> void:
 	if _is_reloading:
 		return
-	_is_reloading = true
-	_reload_timer = profile.reload_time
-	rpc("sync_reload", profile.reload_time)
+	_reload_var.set_value(profile.reload_time)
 
-@rpc("authority", "call_local", "reliable")
-func sync_reload(reload_time: float) -> void:
-	_is_reloading = true
 
+func _on_reload_var_changed() -> void:
+	var reload_time := _reload_var.get_value() as float
+	if reload_time <= 0.0:
+		return
+	apply_reload(reload_time)
+	LocalBus.reload_started.emit(_net.owner_id, reload_time)
+
+
+func apply_reload(reload_time: float) -> void:
+	_is_reloading = true
 	_reload_timer = reload_time
-	var tank := Tank.find_in(self)
-	if tank:
-		LocalBus.reload_started.emit(tank.get_player_id(), reload_time)

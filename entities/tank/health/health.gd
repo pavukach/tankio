@@ -7,41 +7,45 @@ signal health_changed(new_health: float)
 
 @export var max_health: float = 100.0
 
+var _net: NetworkObject
+var net_health: NetSyncVar
+
 var _current_health: float
 
 var current_health: float:
 	get: return _current_health
 
 func _ready() -> void:
+	_net = owner as NetworkObject
 	_current_health = max_health
+	net_health = NetSyncVar.new(max_health, ByteData.Type.FLOAT)
+	_net.register_reliable_var(net_health)
+	net_health.changed.connect(_on_net_health)
 	health_changed.connect(_relay_health_changed)
 
+func _on_net_health() -> void:
+	_current_health = net_health.get_value()
+	health_changed.emit(_current_health)
+
 func _relay_health_changed(_new_health: float) -> void:
-	var tank := Tank.find_in(self)
-	if tank:
-		LocalBus.health_updated.emit(tank.get_player_id(), _current_health, max_health)
+	LocalBus.health_updated.emit(_net.owner_id, _current_health, max_health)
 
 func take_damage(amount: float) -> void:
-	if not is_multiplayer_authority():
+	if not Network.is_server():
 		return
 
 	_current_health = max(0.0, _current_health - amount)
 	damaged.emit(amount, _current_health)
 	health_changed.emit(_current_health)
-	rpc("sync_health", _current_health)
+	net_health.set_value(_current_health)
 
 	if _current_health <= 0.0:
 		died.emit()
 
 func heal(amount: float) -> void:
-	if not is_multiplayer_authority():
+	if not Network.is_server():
 		return
 
 	_current_health = min(max_health, _current_health + amount)
 	health_changed.emit(_current_health)
-	rpc("sync_health", _current_health)
-
-@rpc("authority", "call_local", "reliable")
-func sync_health(new_health: float) -> void:
-	_current_health = new_health
-	health_changed.emit(_current_health)
+	net_health.set_value(_current_health)
