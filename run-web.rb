@@ -88,16 +88,6 @@ unless File.exist?("#{BUILD_DIR}/index.html")
   abort "Build did not produce #{BUILD_DIR}/index.html."
 end
 
-# Precompress the largest assets at max level so Caddy can serve them
-# precompressed (no per-request CPU cost, better ratio than on-the-fly).
-PRECOMPRESS_TARGETS = %w[index.wasm index.pck index.js]
-PRECOMPRESS_TARGETS.each do |name|
-  path = File.join(BUILD_DIR, name)
-  next unless File.exist?(path)
-
-  system("gzip", "-9", "-f", "-k", path, exception: true)
-end
-
 # Start Godot server
 server_pid = start_process(
   pids,
@@ -208,6 +198,18 @@ unless js.sub!(/var ENV=\{\};/, "var ENV={#{json_env}};")
 end
 
 File.write(js_path, js)
+
+# Precompress the largest assets at max level so Caddy can serve them
+# precompressed (no per-request CPU cost, better ratio than on-the-fly).
+# Must run AFTER the ENV injection above so index.js.gz carries the injected
+# host/port/proto instead of the empty placeholder.
+PRECOMPRESS_TARGETS = %w[index.wasm index.pck index.js]
+PRECOMPRESS_TARGETS.each do |name|
+  path = File.join(BUILD_DIR, name)
+  next unless File.exist?(path)
+
+  system("gzip", "-9", "-f", "-k", path, exception: true)
+end
 
 open_url = web_url
 
