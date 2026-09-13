@@ -11,7 +11,7 @@ var _despawning := false
 var _hit_handled := false
 
 var net: NetNode
-var _rot: NetSyncVar
+var _rot: NetVar
 
 @export var profile: ProjectileProfile
 
@@ -20,7 +20,7 @@ var _rot: NetSyncVar
 
 func _ready() -> void:
 	net = owner as NetNode
-	_rot = NetSyncVar.new(rotation, ByteData.Type.FLOAT)
+	_rot = NetVar.new(rotation, ByteData.Type.FLOAT, NetInterp.angle)
 	net.register_var(_rot)
 	net.register_initial_var(_rot)
 	net.register_method(
@@ -28,20 +28,15 @@ func _ready() -> void:
 		[ByteData.Type.FLOAT, ByteData.Type.FLOAT, ByteData.Type.BYTE],
 		true,
 	)
-	if not NetManager.network.is_server():
-		_rot.changed.connect(_on_rot_changed)
 	hitbox.body_shape_entered.connect(_handle_body_collision)
 	if not NetManager.network.is_server():
 		hitbox.monitoring = false
 		hitbox.monitorable = false
 
 
-func _on_rot_changed() -> void:
-	rotation = _rot.get_value()
-
-
 func _physics_process(delta: float) -> void:
 	if not NetManager.network.is_server():
+		rotation = _rot.get_value()
 		return
 	_previous_position = net.global_position
 	_lifetime_timer += delta
@@ -98,4 +93,9 @@ func _request_despawn() -> void:
 
 
 func _on_hit_effect(x: float, y: float, penetrated: int) -> void:
-	Effects.spawn_hit_effect(Vector2(x, y), penetrated != 0)
+	var hit_pos := Vector2(x, y)
+	var did_penetrate := penetrated != 0
+	NetManager.timeline.at_tick(
+		NetManager.network.packet_tick,
+		func(): Effects.spawn_hit_effect(hit_pos, did_penetrate),
+	)

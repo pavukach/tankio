@@ -10,15 +10,13 @@ extends NetNode
 
 var _health_component: Health
 
-func get_player_id() -> int:
-	return owner_id
-
 func _ready():
 	super._ready()
 	if NetManager.network.is_server():
 		_setup_health()
-		var target := InterestTarget.new()
-		add_child(target)
+		# The hull is what moves, so interest has to be measured from it. This
+		# node keeps the transform it was spawned with.
+		hull.add_child(InterestTarget.new(network_id))
 
 func attach_input(reader: InputReader) -> void:
 	if hull:

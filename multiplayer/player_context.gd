@@ -1,31 +1,29 @@
 class_name PlayerContext
-extends NetNode
+extends NetHost
 
-const METHOD_INPUT := 2
-const METHOD_SPAWN_REQUEST := 3
-const METHOD_SPAWNED := 4
-const METHOD_DIED := 5
+const METHOD_INPUT := 0
+const METHOD_SPAWN_REQUEST := 1
+const METHOD_SPAWNED := 2
+const METHOD_DIED := 3
 
 var player_id: int
 var player_name: String
 
 var _input_reader: InputReader
-var _bus: NetworkBus
+var bus: NetworkBus
 
 
 func _ready() -> void:
-	network_id = NetManager.network.CONTEXT_BASE + player_id
-	NetManager.network.add_entity(network_id, self)
-	super._ready()
+	claim_id(NetworkCore.CONTEXT_BASE + player_id)
 
-	_bus = NetworkBus.new()
-	add_child(_bus)
+	bus = NetworkBus.new()
+	add_child(bus)
 
 	if NetManager.network.is_server():
 		_input_reader = InputReader.new()
 		_input_reader.receiver = true
 		add_child(_input_reader)
-		_bus.spawn_requested.connect(_on_bus_spawn_requested)
+		bus.spawn_requested.connect(_on_bus_spawn_requested)
 
 	_register_methods()
 
@@ -47,14 +45,6 @@ func attach_tank(tank: Tank) -> void:
 	tank.attach_input(_input_reader)
 
 
-func notify_spawned(tank_path: NodePath) -> void:
-	_bus.send_spawned(tank_path)
-
-
-func notify_died() -> void:
-	_bus.send_died()
-
-
 func _receive_input(
 	move_x: int,
 	move_y: int,
@@ -69,17 +59,17 @@ func _receive_input(
 
 func _request_spawn(tank_entry_index: int) -> void:
 	if NetManager.network.is_server():
-		_bus.emit_spawn_requested(tank_entry_index)
+		bus.spawn_requested.emit(player_id, tank_entry_index)
 
 
 func _on_tank_spawned(tank_path: String) -> void:
 	if not NetManager.network.is_server():
-		_bus.emit_tank_spawned(NodePath(tank_path))
+		bus.tank_spawned.emit(NodePath(tank_path))
 
 
 func _on_tank_died() -> void:
 	if not NetManager.network.is_server():
-		_bus.emit_tank_died()
+		bus.tank_died.emit()
 
 
 func _on_bus_spawn_requested(_peer_id: int, tank_entry_index: int) -> void:

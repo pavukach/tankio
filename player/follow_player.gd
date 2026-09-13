@@ -5,7 +5,7 @@ var _parent: Node2D
 
 func _ready():
 	var tank := owner as Tank
-	var player_id := tank.get_player_id() if tank else 0
+	var player_id := tank.owner_id if tank else 0
 	if NetManager.network.local_id() != player_id:
 		enabled = false
 		return

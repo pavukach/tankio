@@ -1,8 +1,11 @@
 class_name NetworkCore
 extends RefCounted
 
-const HEADER_SIZE := 5
+const HEADER_SIZE := 9
 const CONTEXT_BASE := 100000
+## Reserved id for the latency probe, which exists on both ends before any
+## entity has been assigned one.
+const PING_ENTITY := 0xFFFFFFFE
 
 signal peer_connected(id: int)
 signal peer_disconnected(id: int)
@@ -10,6 +13,9 @@ signal connected_to_server
 
 var peer: MultiplayerPeer
 var sender_id: int
+## Server tick the packet being handled was sent on. Zero for client packets,
+## which carry no tick of their own.
+var packet_tick: int
 var _entities: Dictionary[int, Object] = {}
 var _players: Array[int] = []
 var _ids := OrderedIndexBank.new()
@@ -131,6 +137,7 @@ func send(
 	var buffer := StreamPeerBuffer.new()
 	buffer.put_u32(entity_id)
 	buffer.put_u8(method_id)
+	buffer.put_u32(NetManager.timeline.server_tick())
 	buffer.put_data(ByteData.encode(payload, method.get_args()))
 
 	peer.put_packet(buffer.data_array)
@@ -147,6 +154,8 @@ func _receive_packet() -> void:
 
 	var entity_id := buffer.get_u32()
 	var method_id := buffer.get_u8()
+	packet_tick = buffer.get_u32()
+	NetManager.timeline.observe_tick(packet_tick)
 
 	var entity: Object = _entities.get(entity_id)
 

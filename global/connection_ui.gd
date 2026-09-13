@@ -12,6 +12,8 @@ func _ready() -> void:
 	connect_btn.pressed.connect(_on_connect_pressed)
 	LocalBus.connected.connect(_on_connected)
 	_prefill_defaults()
+	if OS.get_environment("TANKIO_AUTOCONNECT") == "1":
+		_on_connect_pressed.call_deferred()
 
 func _resolve_defaults() -> Dictionary:
 	var host := OS.get_environment("TANKIO_HOST")

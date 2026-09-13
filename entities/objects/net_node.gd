@@ -1,14 +1,18 @@
 class_name NetNode
-extends Node2D
+extends NetObject
 
-var network_id: int
+## Reserved method slots. Every entity replicates its initial state through
+## one and its per-tick snapshot through the other, so registered methods and
+## reliable variables are numbered from here on.
+const METHOD_CREATE := 0
+const METHOD_SNAPSHOT := 1
+
 var network_type: int
 var owner_id: int
 
-var network_methods: Array[NetFunc]
 var network_vars: Array[NetVar]
 var network_initial_vars: Array[NetVar]
-var network_reliable_vars: Array[NetSyncVar]
+var network_reliable_vars: Array[NetVar]
 var network_reliable_var_indices: Array[int]
 
 signal created
@@ -29,23 +33,18 @@ func _ready() -> void:
 	created.emit()
 
 
-func _physics_process(_delta: float) -> void:
-	if not NetManager.network.is_server() or not network_vars:
-		return
-	NetManager.interest.send(network_id, 1, network_vars.map(func(v): return v.get_value()))
-
-
 func _on_create(...args: Array) -> void:
+	var tick := NetManager.network.packet_tick
 	for i in range(network_initial_vars.size()):
-		network_initial_vars[i].set_value(args[i])
+		network_initial_vars[i].receive(args[i], tick)
 
 
-func register_initial_var(variable: NetSyncVar) -> void:
+func register_initial_var(variable: NetVar) -> void:
 	network_initial_vars.append(variable)
-	network_methods[0].get_args().append(variable.get_type())
+	network_methods[METHOD_CREATE].get_args().append(variable.get_type())
 
 
-func register_reliable_var(variable: NetSyncVar) -> void:
+func register_reliable_var(variable: NetVar) -> void:
 	var index := network_methods.size()
 
 	network_methods.append(NetFunc.new(variable.set_value, [variable.get_type()], true))
@@ -58,13 +57,7 @@ func register_reliable_var(variable: NetSyncVar) -> void:
 
 func register_var(variable: NetVar) -> void:
 	network_vars.append(variable)
-	network_methods[1].get_args().append(variable.get_type())
-
-
-func register_method(callable: Callable, arg_types: Array[ByteData.Type], reliable: bool) -> int:
-	var index := network_methods.size()
-	network_methods.append(NetFunc.new(callable, arg_types, reliable))
-	return index
+	network_methods[METHOD_SNAPSHOT].get_args().append(variable.get_type())
 
 
 func update_initial(player_id: int) -> void:
@@ -73,7 +66,7 @@ func update_initial(player_id: int) -> void:
 	var initial_values: Array = []
 	for v in network_initial_vars:
 		initial_values.append(v.get_value())
-	NetManager.network.send(player_id, network_id, 0, initial_values)
+	NetManager.network.send(player_id, network_id, METHOD_CREATE, initial_values)
 
 
 func update_reliable(player_id: int) -> void:
@@ -83,11 +76,21 @@ func update_reliable(player_id: int) -> void:
 		NetManager.network.send(player_id, network_id, network_reliable_var_indices[i], [network_reliable_vars[i].get_value()])
 
 
+## Keeps a newly replicated entity out of sight until the playhead reaches the
+## tick it was spawned on. The node itself has to exist right away so that the
+## snapshots addressed to it can be buffered, but showing it immediately would
+## put it on screen ahead of the state around it.
+func hide_until_tick(tick: int) -> void:
+	visible = false
+	NetManager.timeline.at_tick(tick, func(): visible = true)
+
+
 func destroy() -> void:
 	destroyed.emit()
 	queue_free()
 
 
 func _update_unreliable(...args: Array) -> void:
+	var tick := NetManager.network.packet_tick
 	for i in range(network_vars.size()):
-		network_vars[i].set_value(args[i])
+		network_vars[i].receive(args[i], tick)

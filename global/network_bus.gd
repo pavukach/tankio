@@ -19,15 +19,3 @@ func send_spawned(tank_path: NodePath) -> void:
 func send_died() -> void:
 	var ctx := get_parent() as PlayerContext
 	NetManager.network.send(ctx.player_id, ctx.network_id, PlayerContext.METHOD_DIED, [])
-
-
-func emit_spawn_requested(tank_entry_index: int) -> void:
-	spawn_requested.emit(get_parent().player_id, tank_entry_index)
-
-
-func emit_tank_spawned(tank_path: NodePath) -> void:
-	tank_spawned.emit(tank_path)
-
-
-func emit_tank_died() -> void:
-	tank_died.emit()

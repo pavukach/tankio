@@ -7,6 +7,6 @@ func _ready() -> void:
 	var tank := owner as Tank
 	if tank == null:
 		return
-	if tank.get_player_id() != NetManager.network.local_id():
+	if tank.owner_id != NetManager.network.local_id():
 		return
 	LocalBus.local_player_spawned.emit(tank)

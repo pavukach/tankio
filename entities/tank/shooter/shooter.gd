@@ -6,7 +6,7 @@ extends Node2D
 @export var muzzle: Marker2D
 
 var _net: NetNode
-var _reload_var: NetSyncVar
+var _reload_var: NetVar
 var _proj_index: int
 
 var _is_reloading := false
@@ -15,7 +15,7 @@ var _reload_timer := 0.0
 
 func _ready() -> void:
 	_net = owner as NetNode
-	_reload_var = NetSyncVar.new(0.0, ByteData.Type.FLOAT)
+	_reload_var = NetVar.new(0.0, ByteData.Type.FLOAT)
 	_net.register_reliable_var(_reload_var)
 	_reload_var.changed.connect(_on_reload_var_changed)
 	_proj_index = NetManager.spawner.index_of_scene(profile.projectile_scene)

@@ -1,25 +1,28 @@
 class_name InterestZone
 extends Area2D
 
+const SPAWN_RADIUS := 900.0
+const DESPAWN_RADIUS := 1050.0
+
 enum Type {
 	SPAWN,
 	DESPAWN
 }
 
 var player_id: int
-var size: int
+var radius: float
 var type: Type
 
-func _init(p_player_id: int, p_size: int, p_type: Type) -> void:
+func _init(p_player_id: int, p_radius: float, p_type: Type) -> void:
 	player_id = p_player_id
-	size = p_size
+	radius = p_radius
 	type = p_type
 
 func _ready():
 	var collider := CollisionShape2D.new()
 	var shape := CircleShape2D.new()
 
-	shape.radius = size
+	shape.radius = radius
 	collider.shape = shape
 
 	add_child(collider)

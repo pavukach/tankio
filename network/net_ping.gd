@@ -1,0 +1,61 @@
+class_name NetPing
+extends NetHost
+
+## Measures round-trip time to the server.
+##
+## A client periodically sends a sequence number that the server echoes back
+## unchanged, and halves the round-trip to estimate one-way latency. The
+## timeline sizes its interpolation delay from that estimate.
+
+const METHOD_REQUEST := 0
+const METHOD_REPLY := 1
+
+var _latency := 0.0
+var _interval_timer := 0.0
+var _sequence := 0
+var _sent_at_ms := 0
+
+
+func _ready() -> void:
+	network_methods = [
+		NetFunc.new(_on_request, [ByteData.Type.UINT], true),
+		NetFunc.new(_on_reply, [ByteData.Type.UINT], true),
+	]
+	claim_id(NetworkCore.PING_ENTITY)
+
+
+## Smoothed one-way latency in seconds. Zero until the first reply arrives.
+func latency() -> float:
+	return _latency
+
+
+func _process(delta: float) -> void:
+	if NetManager.network.is_server() or NetManager.network.peer == null:
+		return
+	_interval_timer += delta
+	if _interval_timer < NetConfig.PING_INTERVAL:
+		return
+	_interval_timer = 0.0
+	_sequence += 1
+	_sent_at_ms = Time.get_ticks_msec()
+	NetManager.network.send(1, NetworkCore.PING_ENTITY, METHOD_REQUEST, [_sequence])
+
+
+func _on_request(sequence: int) -> void:
+	NetManager.network.send(
+		NetManager.network.sender_id,
+		NetworkCore.PING_ENTITY,
+		METHOD_REPLY,
+		[sequence],
+	)
+
+
+func _on_reply(sequence: int) -> void:
+	# Replies to superseded pings say nothing about the current round-trip.
+	if sequence != _sequence:
+		return
+	var one_way := (Time.get_ticks_msec() - _sent_at_ms) / 2000.0
+	if _latency <= 0.0:
+		_latency = one_way
+		return
+	_latency = lerpf(_latency, one_way, NetConfig.PING_SMOOTHING)

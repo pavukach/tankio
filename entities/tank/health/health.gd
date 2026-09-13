@@ -8,7 +8,7 @@ signal health_changed(new_health: float)
 @export var max_health: float = 100.0
 
 var _net: NetNode
-var net_health: NetSyncVar
+var net_health: NetVar
 
 var _current_health: float
 
@@ -18,7 +18,7 @@ var current_health: float:
 func _ready() -> void:
 	_net = owner as NetNode
 	_current_health = max_health
-	net_health = NetSyncVar.new(max_health, ByteData.Type.FLOAT)
+	net_health = NetVar.new(max_health, ByteData.Type.FLOAT)
 	_net.register_reliable_var(net_health)
 	net_health.changed.connect(_on_net_health)
 	health_changed.connect(_relay_health_changed)

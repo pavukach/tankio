@@ -84,7 +84,10 @@ func _on_spawn_requested(peer_id: int, tank_entry_index: int) -> void:
 		spawn_position = spawn_point.position
 		spawn_rotation = spawn_point.rotation
 
-	var tank := NetManager.spawner.spawn(tank_entry_index, Transform2D(spawn_rotation, spawn_position))
+	var tank := NetManager.spawner.spawn(
+		tank_entry_index,
+		Transform2D(spawn_rotation, spawn_position),
+	) as Tank
 	if not tank:
 		return
 	_configure_tank(tank, peer_id)
@@ -94,12 +97,13 @@ func _on_spawn_requested(peer_id: int, tank_entry_index: int) -> void:
 	var ctx := NetManager.network.get_entity(NetManager.network.CONTEXT_BASE + peer_id) as PlayerContext
 	if ctx:
 		ctx.attach_tank(tank)
-		ctx.notify_spawned(tank.get_path())
+		ctx.bus.send_spawned(tank.get_path())
 
-	var spawn_zone := InterestZone.new(peer_id, 2000, InterestZone.Type.SPAWN)
-	var despawn_zone := InterestZone.new(peer_id, 2500, InterestZone.Type.DESPAWN)
-	tank.add_child(spawn_zone)
-	tank.add_child(despawn_zone)
+	# Anchored on the hull, which is the part that moves.
+	var spawn_zone := InterestZone.new(peer_id, InterestZone.SPAWN_RADIUS, InterestZone.Type.SPAWN)
+	var despawn_zone := InterestZone.new(peer_id, InterestZone.DESPAWN_RADIUS, InterestZone.Type.DESPAWN)
+	tank.hull.add_child(spawn_zone)
+	tank.hull.add_child(despawn_zone)
 
 
 func _on_peer_disconnected(peer_id: int) -> void:
@@ -113,7 +117,7 @@ func _on_tank_died(tank: Node2D) -> void:
 	_player_tanks.erase(peer_id)
 	var ctx := NetManager.network.get_entity(NetManager.network.CONTEXT_BASE + peer_id) as PlayerContext
 	if ctx:
-		ctx.notify_died()
+		ctx.bus.send_died()
 	if tank is NetNode:
 		tank.destroy()
 	else:

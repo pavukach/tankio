@@ -1,18 +1,20 @@
 class_name InterestTarget
 extends Area2D
 
+const RADIUS := 32.0
+
 var entity_id: int
 
 
+func _init(p_entity_id: int) -> void:
+	entity_id = p_entity_id
+
+
 func _ready():
-	var net_obj: NetNode = owner as NetNode
-	if net_obj == null:
-		net_obj = get_parent() as NetNode
-	entity_id = net_obj.network_id
 	var collider := CollisionShape2D.new()
 	var shape := CircleShape2D.new()
 
-	shape.radius = 32.0
+	shape.radius = RADIUS
 	collider.shape = shape
 
 	add_child(collider)
