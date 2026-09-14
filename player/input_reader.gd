@@ -62,7 +62,7 @@ func _process(_delta: float) -> void:
 	if not NetManager.network.is_server():
 		NetManager.network.send(
 			1,
-			NetManager.network.CONTEXT_BASE + NetManager.network.peer.get_unique_id(),
+			NetworkCore.CONTEXT_ENTITY,
 			PlayerContext.METHOD_INPUT,
 			[move.x, move.y, mouse.x, mouse.y, 1 if shooting else 0, 1 if ability else 0],
 		)

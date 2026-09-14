@@ -24,6 +24,10 @@ func _init() -> void:
 		NetFunc.new(_on_create, [], true),
 		NetFunc.new(_update_unreliable, [], false),
 	]
+	network_vars = []
+	network_initial_vars = []
+	network_reliable_vars = []
+	network_reliable_var_indices = []
 
 
 func _ready() -> void:
@@ -31,6 +35,16 @@ func _ready() -> void:
 	destroyed.connect(NetManager.interest.on_entity_destroyed.bind(self))
 	destroyed.connect(func(): if NetManager.network.is_server(): NetManager.network.release_entity(network_id))
 	created.emit()
+
+
+func _physics_process(_delta: float) -> void:
+	if not NetManager.network.is_server() or network_vars.is_empty():
+		return
+	NetManager.interest.send(
+		network_id,
+		METHOD_SNAPSHOT,
+		network_vars.map(func(v): return v.get_value()),
+	)
 
 
 func _on_create(...args: Array) -> void:
@@ -73,7 +87,12 @@ func update_reliable(player_id: int) -> void:
 	for i in range(network_reliable_vars.size()):
 		if network_reliable_vars[i].is_initial():
 			continue
-		NetManager.network.send(player_id, network_id, network_reliable_var_indices[i], [network_reliable_vars[i].get_value()])
+		NetManager.network.send(
+			player_id,
+			network_id,
+			network_reliable_var_indices[i],
+			[network_reliable_vars[i].get_value()],
+		)
 
 
 ## Keeps a newly replicated entity out of sight until the playhead reaches the
@@ -82,7 +101,7 @@ func update_reliable(player_id: int) -> void:
 ## put it on screen ahead of the state around it.
 func hide_until_tick(tick: int) -> void:
 	visible = false
-	NetManager.timeline.at_tick(tick, func(): visible = true)
+	run_at_replication_tick(tick, func(): visible = true)
 
 
 func destroy() -> void:

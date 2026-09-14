@@ -2,10 +2,15 @@ extends Node
 
 var _contexts: Dictionary[int, PlayerContext] = {}
 
+
 func _ready() -> void:
 	NetManager.network.peer_connected.connect(_on_peer_connected)
 	NetManager.network.peer_disconnected.connect(_on_peer_disconnected)
 	NetManager.network.connected_to_server.connect(_connect_local)
+
+
+func get_context(peer_id: int) -> PlayerContext:
+	return _contexts.get(peer_id)
 
 
 func _on_peer_connected(id: int) -> void:

@@ -6,6 +6,7 @@ var interest: NetInterest
 var timeline: NetTimeline
 var ping: NetPing
 
+
 func _ready() -> void:
 	network = NetworkCore.new()
 	spawner = NetSpawner.new()

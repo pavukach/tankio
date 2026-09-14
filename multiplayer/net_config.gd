@@ -19,9 +19,11 @@ const DELAY_SHRINK_RATE := 0.03
 ## Client latency probe.
 const PING_INTERVAL := 0.5
 const PING_SMOOTHING := 0.2
+const PING_SPIKE_SMOOTHING := 0.5
+const PING_DECAY_SMOOTHING := 0.03
 
-## Snapshots retained per variable. Has to span INTERP_DELAY_TICKS with room
-## left for late and reordered packets.
+## Snapshots retained per variable. Has to span the interpolation delay with
+## room left for late and reordered packets.
 const SNAPSHOT_HISTORY := 32
 
 ## Fraction of the remaining offset error the playhead closes per tick.

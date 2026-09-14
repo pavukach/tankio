@@ -6,11 +6,16 @@ const RADIUS := 32.0
 var entity_id: int
 
 
-func _init(p_entity_id: int) -> void:
+func _init(p_entity_id: int = 0) -> void:
 	entity_id = p_entity_id
 
 
 func _ready():
+	if entity_id == 0:
+		var net_obj: NetNode = owner as NetNode
+		if net_obj == null:
+			net_obj = get_parent() as NetNode
+		entity_id = net_obj.network_id
 	var collider := CollisionShape2D.new()
 	var shape := CircleShape2D.new()
 
@@ -25,6 +30,7 @@ func _ready():
 	area_entered.connect(_on_area_entered)
 	area_exited.connect(_on_area_exited)
 
+
 func _on_area_entered(area: Area2D) -> void:
 	if not NetManager.network.is_server():
 		return
@@ -36,6 +42,7 @@ func _on_area_entered(area: Area2D) -> void:
 		return
 
 	NetManager.interest.start_tracking(entity_id, zone.player_id)
+
 
 func _on_area_exited(area: Area2D) -> void:
 	if not NetManager.network.is_server():

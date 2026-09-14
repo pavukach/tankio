@@ -23,7 +23,7 @@ func _ready() -> void:
 	_rot = NetVar.new(rotation, ByteData.Type.FLOAT, NetInterp.angle)
 	net.register_var(_rot)
 	net.register_initial_var(_rot)
-	net.register_method(
+	net.register_replication_method(
 		_on_hit_effect,
 		[ByteData.Type.FLOAT, ByteData.Type.FLOAT, ByteData.Type.BYTE],
 		true,
@@ -95,7 +95,7 @@ func _request_despawn() -> void:
 func _on_hit_effect(x: float, y: float, penetrated: int) -> void:
 	var hit_pos := Vector2(x, y)
 	var did_penetrate := penetrated != 0
-	NetManager.timeline.at_tick(
+	net.run_at_replication_tick(
 		NetManager.network.packet_tick,
 		func(): Effects.spawn_hit_effect(hit_pos, did_penetrate),
 	)

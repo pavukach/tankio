@@ -94,7 +94,7 @@ func _on_spawn_requested(peer_id: int, tank_entry_index: int) -> void:
 	NetManager.interest.start_tracking(tank.network_id, peer_id)
 	_player_tanks[peer_id] = tank
 
-	var ctx := NetManager.network.get_entity(NetManager.network.CONTEXT_BASE + peer_id) as PlayerContext
+	var ctx := NetManager.network.get_context(peer_id) as PlayerContext
 	if ctx:
 		ctx.attach_tank(tank)
 		ctx.bus.send_spawned(tank.get_path())
@@ -115,7 +115,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 func _on_tank_died(tank: Node2D) -> void:
 	var peer_id := tank.get_meta("peer_id") as int
 	_player_tanks.erase(peer_id)
-	var ctx := NetManager.network.get_entity(NetManager.network.CONTEXT_BASE + peer_id) as PlayerContext
+	var ctx := NetManager.network.get_context(peer_id) as PlayerContext
 	if ctx:
 		ctx.bus.send_died()
 	if tank is NetNode:

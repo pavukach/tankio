@@ -6,10 +6,44 @@ enum Type {
 	INT,
 	FLOAT,
 	STRING,
+	## Injected by NetworkCore from the transport sender id; never on the wire.
+	PEER,
 }
 
+static func wire_types(types: Array[ByteData.Type]) -> Array[ByteData.Type]:
+	var out: Array[ByteData.Type] = []
+	for type in types:
+		if type != Type.PEER:
+			out.append(type)
+	return out
+
+
 static func encode(args: Array, types: Array[ByteData.Type]) -> PackedByteArray:
-	var data := PackedByteArray()
+	return _encode_wire(args, wire_types(types))
+
+
+static func decode_with_peer(
+	data: PackedByteArray,
+	types: Array[ByteData.Type],
+	sender_id: int,
+) -> Array:
+	var wire_args := decode(data, wire_types(types))
+	var args: Array = []
+	var wire_index := 0
+	for type in types:
+		if type == Type.PEER:
+			args.append(sender_id)
+		else:
+			args.append(wire_args[wire_index])
+			wire_index += 1
+	return args
+
+
+static func decode(data: PackedByteArray, types: Array) -> Array:
+	return _decode_wire(data, types)
+
+
+static func _encode_wire(args: Array, types: Array[ByteData.Type]) -> PackedByteArray:
 	var stream := StreamPeerBuffer.new()
 	for i in range(args.size()):
 		var arg = args[i]
@@ -27,11 +61,13 @@ static func encode(args: Array, types: Array[ByteData.Type]) -> PackedByteArray:
 			Type.STRING:
 				stream.put_data(arg.to_utf8_buffer())
 				stream.put_u8(0)
+			Type.PEER:
+				push_error("PEER must not be encoded on the wire")
 
-	data = stream.get_data_array()
-	return data
+	return stream.get_data_array()
 
-static func decode(data: PackedByteArray, types: Array) -> Array:
+
+static func _decode_wire(data: PackedByteArray, types: Array) -> Array:
 	var args := []
 	var stream := StreamPeerBuffer.new()
 	stream.data_array = data
@@ -56,5 +92,7 @@ static func decode(data: PackedByteArray, types: Array) -> Array:
 						break
 					bytes.append(byte)
 				args.append(PackedByteArray(bytes).get_string_from_utf8())
-	
+			Type.PEER:
+				push_error("PEER must not be decoded from the wire")
+
 	return args

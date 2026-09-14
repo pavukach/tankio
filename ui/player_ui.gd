@@ -26,7 +26,7 @@ func initialize():
 
 
 func _local_context() -> PlayerContext:
-	return NetManager.network.get_entity(NetManager.network.CONTEXT_BASE + NetManager.network.peer.get_unique_id()) as PlayerContext
+	return NetManager.network.get_entity(NetworkCore.CONTEXT_ENTITY) as PlayerContext
 
 func _on_tank_selected(index: int):
 	_selector.hide()

@@ -58,4 +58,9 @@ func _on_reply(sequence: int) -> void:
 	if _latency <= 0.0:
 		_latency = one_way
 		return
-	_latency = lerpf(_latency, one_way, NetConfig.PING_SMOOTHING)
+	var rate := (
+		NetConfig.PING_SPIKE_SMOOTHING
+		if one_way > _latency
+		else NetConfig.PING_DECAY_SMOOTHING
+	)
+	_latency = lerpf(_latency, one_way, rate)

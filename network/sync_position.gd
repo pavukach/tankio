@@ -12,7 +12,8 @@ var target_pos: Vector2:
 
 
 func _ready() -> void:
-	process_physics_priority = -64
+	process_physics_priority = NetProcessPriority.SYNC_APPLY
+	process_priority = NetProcessPriority.SYNC_APPLY
 
 	_net = owner as NetNode
 	_parent = get_parent() as Node2D
@@ -31,9 +32,13 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	if NetManager.network.is_server():
-		_pos_x.set_value(_parent.global_position.x)
-		_pos_y.set_value(_parent.global_position.y)
+	if not NetManager.network.is_server():
 		return
+	_pos_x.set_value(_parent.global_position.x)
+	_pos_y.set_value(_parent.global_position.y)
 
+
+func _process(_delta: float) -> void:
+	if NetManager.network.is_server():
+		return
 	_parent.global_position = target_pos

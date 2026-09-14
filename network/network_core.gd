@@ -2,7 +2,7 @@ class_name NetworkCore
 extends RefCounted
 
 const HEADER_SIZE := 9
-const CONTEXT_BASE := 100000
+const CONTEXT_ENTITY := 0xFFFFFFFD
 ## Reserved id for the latency probe, which exists on both ends before any
 ## entity has been assigned one.
 const PING_ENTITY := 0xFFFFFFFE
@@ -10,6 +10,7 @@ const PING_ENTITY := 0xFFFFFFFE
 signal peer_connected(id: int)
 signal peer_disconnected(id: int)
 signal connected_to_server
+signal packet_received(tick: int)
 
 var peer: MultiplayerPeer
 var sender_id: int
@@ -17,11 +18,13 @@ var sender_id: int
 ## which carry no tick of their own.
 var packet_tick: int
 var _entities: Dictionary[int, Object] = {}
+var _contexts: Dictionary[int, Object] = {}
 var _players: Array[int] = []
 var _ids := OrderedIndexBank.new()
 var _is_server := false
 var _connected_emitted := false
 var _connected_peers: Array[int] = []
+
 
 func _init() -> void:
 	add_entity(acquire_id(), self)
@@ -104,6 +107,18 @@ func remove_entity(id: int) -> void:
 	_entities.erase(id)
 
 
+func register_context(peer_id: int, context: Object) -> void:
+	_contexts[peer_id] = context
+
+
+func unregister_context(peer_id: int) -> void:
+	_contexts.erase(peer_id)
+
+
+func get_context(peer_id: int) -> Object:
+	return _contexts.get(peer_id)
+
+
 func send(
 	peer_id: int,
 	entity_id: int,
@@ -113,8 +128,7 @@ func send(
 	if peer == null:
 		return
 
-	var entity: Object = _entities.get(entity_id)
-
+	var entity := _resolve_entity(entity_id, peer_id)
 	if entity == null:
 		push_error("Entity not found")
 		return
@@ -142,6 +156,15 @@ func send(
 
 	peer.put_packet(buffer.data_array)
 
+
+func _resolve_entity(entity_id: int, route_peer_id: int) -> Object:
+	if entity_id == CONTEXT_ENTITY:
+		if _is_server:
+			return _contexts.get(route_peer_id)
+		return _entities.get(CONTEXT_ENTITY)
+	return _entities.get(entity_id)
+
+
 func _receive_packet() -> void:
 	sender_id = peer.get_packet_peer()
 	var data := peer.get_packet()
@@ -155,10 +178,9 @@ func _receive_packet() -> void:
 	var entity_id := buffer.get_u32()
 	var method_id := buffer.get_u8()
 	packet_tick = buffer.get_u32()
-	NetManager.timeline.observe_tick(packet_tick)
+	packet_received.emit(packet_tick)
 
-	var entity: Object = _entities.get(entity_id)
-
+	var entity := _resolve_entity(entity_id, sender_id)
 	if entity == null:
 		return
 
@@ -166,11 +188,7 @@ func _receive_packet() -> void:
 		buffer.get_available_bytes()
 	)[1]
 
-	_call_network_method(
-		entity,
-		method_id,
-		payload,
-	)
+	_call_network_method(entity, method_id, payload)
 
 
 func _call_network_method(
@@ -183,7 +201,10 @@ func _call_network_method(
 		return
 
 	var methods: Array[NetFunc] = entity.network_methods
-	var method = methods[method_id]
+	var method: NetFunc = methods[method_id]
 
-	var args := ByteData.decode(payload, method.get_args())
-	method.invoke(args)
+	var args := ByteData.decode_with_peer(payload, method.get_args(), sender_id)
+	if not _is_server and method.wait_for_packet_tick and entity is NetObject:
+		(entity as NetObject).invoke_replication_method(method, args, packet_tick)
+	else:
+		method.invoke(args)

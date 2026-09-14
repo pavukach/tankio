@@ -13,7 +13,8 @@ var target_rot: float:
 
 
 func _ready() -> void:
-	process_physics_priority = -64
+	process_physics_priority = NetProcessPriority.SYNC_APPLY
+	process_priority = NetProcessPriority.SYNC_APPLY
 
 	_net = owner as NetNode
 	_parent = get_parent() as Node2D
@@ -28,10 +29,14 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	if NetManager.network.is_server():
-		_rot.set_value(parent_rotation())
+	if not NetManager.network.is_server():
 		return
+	_rot.set_value(parent_rotation())
 
+
+func _process(_delta: float) -> void:
+	if NetManager.network.is_server():
+		return
 	_apply_parent(target_rot)
 
 

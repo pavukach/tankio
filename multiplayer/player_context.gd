@@ -14,7 +14,10 @@ var bus: NetworkBus
 
 
 func _ready() -> void:
-	claim_id(NetworkCore.CONTEXT_BASE + player_id)
+	if NetManager.network.is_server():
+		NetManager.network.register_context(player_id, self)
+	else:
+		claim_id(NetworkCore.CONTEXT_ENTITY)
 
 	bus = NetworkBus.new()
 	add_child(bus)
@@ -28,13 +31,29 @@ func _ready() -> void:
 	_register_methods()
 
 
+func _exit_tree() -> void:
+	if NetManager.network.is_server():
+		NetManager.network.unregister_context(player_id)
+
+
 func _register_methods() -> void:
 	network_methods.append(NetFunc.new(
 		_receive_input,
-		[ByteData.Type.INT, ByteData.Type.INT, ByteData.Type.FLOAT, ByteData.Type.FLOAT, ByteData.Type.BYTE, ByteData.Type.BYTE],
+		[
+			ByteData.Type.INT,
+			ByteData.Type.INT,
+			ByteData.Type.FLOAT,
+			ByteData.Type.FLOAT,
+			ByteData.Type.BYTE,
+			ByteData.Type.BYTE,
+		],
 		false,
 	))
-	network_methods.append(NetFunc.new(_request_spawn, [ByteData.Type.UINT], true))
+	network_methods.append(NetFunc.new(
+		_request_spawn,
+		[ByteData.Type.PEER, ByteData.Type.UINT],
+		true,
+	))
 	network_methods.append(NetFunc.new(_on_tank_spawned, [ByteData.Type.STRING], true))
 	network_methods.append(NetFunc.new(_on_tank_died, [], true))
 
@@ -57,9 +76,9 @@ func _receive_input(
 		_input_reader.apply_remote(move_x, move_y, Vector2(mouse_x, mouse_y), shooting != 0, ability != 0)
 
 
-func _request_spawn(tank_entry_index: int) -> void:
+func _request_spawn(sender_peer: int, tank_entry_index: int) -> void:
 	if NetManager.network.is_server():
-		bus.spawn_requested.emit(player_id, tank_entry_index)
+		bus.spawn_requested.emit(sender_peer, tank_entry_index)
 
 
 func _on_tank_spawned(tank_path: String) -> void:
@@ -72,5 +91,5 @@ func _on_tank_died() -> void:
 		bus.tank_died.emit()
 
 
-func _on_bus_spawn_requested(_peer_id: int, tank_entry_index: int) -> void:
-	TankSpawner._on_spawn_requested(player_id, tank_entry_index)
+func _on_bus_spawn_requested(peer_id: int, tank_entry_index: int) -> void:
+	TankSpawner._on_spawn_requested(peer_id, tank_entry_index)
