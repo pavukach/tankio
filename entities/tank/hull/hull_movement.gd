@@ -10,7 +10,7 @@ func _ready():
 		freeze = true
 
 func _integrate_forces(state):
-	if not NetManager.network.is_server() or not is_instance_valid(input):
+	if not NetManager.network.is_server():
 		return
 
 	_move(state)

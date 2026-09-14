@@ -37,8 +37,7 @@ func invoke_replication_method(
 
 func run_at_replication_tick(tick: int, action: Callable) -> void:
 	if NetManager.network.is_server() or NetManager.timeline.playhead() >= tick:
-		if action.is_valid():
-			action.call()
+		action.call()
 		return
 	ReplicationTickWaiter.new(tick, action)
 

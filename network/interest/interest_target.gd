@@ -12,10 +12,7 @@ func _init(p_entity_id: int = 0) -> void:
 
 func _ready():
 	if entity_id == 0:
-		var net_obj: NetNode = owner as NetNode
-		if net_obj == null:
-			net_obj = get_parent() as NetNode
-		entity_id = net_obj.network_id
+		entity_id = (owner as NetNode).network_id
 	var collider := CollisionShape2D.new()
 	var shape := CircleShape2D.new()
 
@@ -34,10 +31,7 @@ func _ready():
 func _on_area_entered(area: Area2D) -> void:
 	if not NetManager.network.is_server():
 		return
-	if area is not InterestZone:
-		return
-
-	var zone: InterestZone = area
+	var zone := area as InterestZone
 	if zone.type != InterestZone.Type.SPAWN:
 		return
 
@@ -47,10 +41,7 @@ func _on_area_entered(area: Area2D) -> void:
 func _on_area_exited(area: Area2D) -> void:
 	if not NetManager.network.is_server():
 		return
-	if area is not InterestZone:
-		return
-
-	var zone: InterestZone = area
+	var zone := area as InterestZone
 	if zone.type != InterestZone.Type.DESPAWN:
 		return
 

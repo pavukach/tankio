@@ -52,8 +52,7 @@ func _process(_delta: float) -> void:
 
 	if camera == null:
 		camera = get_viewport().get_camera_2d()
-	if camera:
-		mouse = camera.get_global_mouse_position()
+	mouse = camera.get_global_mouse_position()
 
 	if not NetManager.network.is_server():
 		NetManager.network.send(

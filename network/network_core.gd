@@ -125,12 +125,6 @@ func send(
 		return
 
 	var entity := _resolve_entity(entity_id, peer_id)
-	if entity == null:
-		push_error("Entity not found")
-		return
-	if not "network_methods" in entity:
-		push_error("Entity has no network methods")
-		return
 
 	if peer_id != 0 and peer_id not in _connected_peers:
 		return
@@ -192,15 +186,11 @@ func _call_network_method(
 	method_id: int,
 	payload: PackedByteArray,
 ) -> void:
-	if not "network_methods" in entity:
-		push_error("Entity has no network methods")
-		return
-
 	var methods: Array[NetFunc] = entity.network_methods
 	var method: NetFunc = methods[method_id]
 
 	var args := ByteData.decode_with_peer(payload, method.get_args(), sender_id)
-	if not _is_server and method.wait_for_packet_tick and entity is NetObject:
+	if not _is_server and method.wait_for_packet_tick:
 		(entity as NetObject).invoke_replication_method(method, args, packet_tick)
 	else:
 		method.invoke(args)

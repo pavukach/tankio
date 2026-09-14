@@ -59,8 +59,6 @@ func _register_methods() -> void:
 
 
 func attach_tank(tank: Tank) -> void:
-	if _input_reader == null:
-		return
 	tank.attach_input(_input_reader)
 
 
@@ -72,8 +70,7 @@ func _receive_input(
 	shooting: int,
 	ability: int,
 ) -> void:
-	if _input_reader:
-		_input_reader.apply_remote(move_x, move_y, Vector2(mouse_x, mouse_y), shooting != 0, ability != 0)
+	_input_reader.apply_remote(move_x, move_y, Vector2(mouse_x, mouse_y), shooting != 0, ability != 0)
 
 
 func _request_spawn(sender_peer: int, tank_entry_index: int) -> void:

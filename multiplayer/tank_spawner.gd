@@ -32,8 +32,7 @@ func _ready():
 	NetManager.spawner.entities = scenes
 	NetManager.spawner.rebuild_index()
 
-	if NetManager.network.is_server():
-		NetManager.network.peer_disconnected.connect(_on_peer_disconnected)
+	NetManager.network.peer_disconnected.connect(_on_peer_disconnected)
 
 
 func setup():
@@ -42,43 +41,30 @@ func setup():
 
 
 func _collect_spawn_points():
-	var node := get_node_or_null(spawn_points_root)
-	if not node:
-		return
-
+	var node := get_node(spawn_points_root)
 	for child in node.get_children():
 		_spawn_points.append(child)
 
 
-func _configure_tank(t: Node2D, id: int) -> void:
+func _configure_tank(t: Tank, id: int) -> void:
 	t.set_meta("peer_id", id)
 	t.owner_id = id
 	t.add_to_group(str(id))
 	for child in t.find_children("*", "", true, false):
 		child.add_to_group(str(id))
 
-	var tank_health := t.get_node_or_null("Health") as Health
-	if tank_health:
-		tank_health.died.connect(_on_tank_died.bind(t))
+	t.get_node("Health").died.connect(_on_tank_died.bind(t))
 
 
 func _on_spawn_requested(peer_id: int, tank_entry_index: int) -> void:
 	var spawn_position: Vector2
 	var spawn_rotation: float
-	var old_tank := _player_tanks.get(peer_id) as Node2D
+	var old_tank := _player_tanks.get(peer_id) as Tank
 
-	if old_tank and is_instance_valid(old_tank):
-		var hull := old_tank.get_node_or_null("Hull") as Node2D
-		if hull:
-			spawn_position = hull.global_position
-			spawn_rotation = hull.global_rotation
-		else:
-			spawn_position = old_tank.position
-			spawn_rotation = old_tank.rotation
-		if old_tank is NetNode:
-			old_tank.destroy()
-		else:
-			old_tank.queue_free()
+	if old_tank:
+		spawn_position = old_tank.hull.global_position
+		spawn_rotation = old_tank.hull.global_rotation
+		old_tank.destroy()
 	else:
 		var spawn_point = _spawn_points[randi() % _spawn_points.size()]
 		spawn_position = spawn_point.position
@@ -88,16 +74,13 @@ func _on_spawn_requested(peer_id: int, tank_entry_index: int) -> void:
 		tank_entry_index,
 		Transform2D(spawn_rotation, spawn_position),
 	) as Tank
-	if not tank:
-		return
 	_configure_tank(tank, peer_id)
 	NetManager.interest.start_tracking(tank.network_id, peer_id)
 	_player_tanks[peer_id] = tank
 
 	var ctx := NetManager.network.get_context(peer_id) as PlayerContext
-	if ctx:
-		ctx.attach_tank(tank)
-		ctx.bus.send_spawned(tank.get_path())
+	ctx.attach_tank(tank)
+	ctx.bus.send_spawned(tank.get_path())
 
 	var spawn_zone := InterestZone.new(peer_id, InterestZone.SPAWN_RADIUS, InterestZone.Type.SPAWN)
 	var despawn_zone := InterestZone.new(peer_id, InterestZone.DESPAWN_RADIUS, InterestZone.Type.DESPAWN)
@@ -106,18 +89,16 @@ func _on_spawn_requested(peer_id: int, tank_entry_index: int) -> void:
 
 
 func _on_peer_disconnected(peer_id: int) -> void:
-	var tank := _player_tanks.get(peer_id) as Node2D
-	if tank and is_instance_valid(tank):
-		_on_tank_died(tank)
+	var tank := _player_tanks.get(peer_id) as Tank
+	if not tank:
+		return
+	_player_tanks.erase(peer_id)
+	tank.destroy()
 
 
-func _on_tank_died(tank: Node2D) -> void:
+func _on_tank_died(tank: Tank) -> void:
 	var peer_id := tank.get_meta("peer_id") as int
 	_player_tanks.erase(peer_id)
 	var ctx := NetManager.network.get_context(peer_id) as PlayerContext
-	if ctx:
-		ctx.bus.send_died()
-	if tank is NetNode:
-		tank.destroy()
-	else:
-		tank.queue_free()
+	ctx.bus.send_died()
+	tank.destroy()

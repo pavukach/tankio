@@ -19,7 +19,7 @@ func _ready() -> void:
 
 
 func _world() -> Node:
-	if world == null or not is_instance_valid(world):
+	if world == null:
 		world = get_node("/root/Game/World")
 	return world
 
@@ -38,11 +38,7 @@ func spawn(entity_index: int, initial_transform := Transform2D.IDENTITY) -> NetN
 	if not NetManager.network.is_server():
 		push_error("Can only spawn entities on the server")
 		return null
-	var entity = entities[entity_index].instantiate()
-
-	if entity is not NetNode:
-		push_error("Can only spawn NetworkObjects")
-		return null
+	var entity := entities[entity_index].instantiate() as NetNode
 	var id := NetManager.network.acquire_id()
 	NetManager.network.add_entity(id, entity)
 	entity.network_id = id
@@ -68,7 +64,7 @@ func replicate_despawn(player_id: int, entity_id: int) -> void:
 
 
 func _spawn_remote(entity_id: int, index: int, owner_id: int) -> void:
-	var entity = entities[index].instantiate()
+	var entity := entities[index].instantiate() as NetNode
 	entity.network_id = entity_id
 	entity.network_type = index
 	entity.owner_id = owner_id
@@ -80,8 +76,6 @@ func _spawn_remote(entity_id: int, index: int, owner_id: int) -> void:
 
 
 func _despawn_remote(entity_id: int) -> void:
-	var entity = NetManager.network.get_entity(entity_id)
-	if entity == null or entity.is_queued_for_deletion():
-		return
+	var entity := NetManager.network.get_entity(entity_id) as NetNode
 	NetManager.network.remove_entity(entity_id)
 	entity.queue_free()

@@ -61,7 +61,7 @@ func setup(
 
 
 func _handle_body_collision(_body_rid: RID, body: Node2D, body_shape_index: int, _local_shape_index: int) -> void:
-	if not NetManager.network.is_server() or _despawning or _hit_handled or not is_instance_valid(body):
+	if not NetManager.network.is_server() or _despawning or _hit_handled:
 		return
 	if body.is_in_group(str(net.owner_id)):
 		return

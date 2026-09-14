@@ -24,7 +24,7 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	if not NetManager.network.is_server() or not input:
+	if not NetManager.network.is_server():
 		return
 
 	if _is_reloading:

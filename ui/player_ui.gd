@@ -15,9 +15,8 @@ func initialize():
 	_selector.build(TankSpawner)
 
 	var ctx := _local_context()
-	if ctx:
-		ctx.bus.tank_spawned.connect(_on_tank_spawned)
-		ctx.bus.tank_died.connect(_on_tank_died)
+	ctx.bus.tank_spawned.connect(_on_tank_spawned)
+	ctx.bus.tank_died.connect(_on_tank_died)
 	LocalBus.health_updated.connect(_on_health_updated)
 	LocalBus.reload_started.connect(_on_reload_started)
 	LocalBus.local_player_spawned.connect(_on_local_player_spawned)
@@ -31,8 +30,7 @@ func _local_context() -> PlayerContext:
 func _on_tank_selected(index: int):
 	_selector.hide()
 	var ctx := _local_context()
-	if ctx:
-		ctx.bus.request_spawn(index)
+	ctx.bus.request_spawn(index)
 
 func _on_tank_spawned(_tank_path: NodePath):
 	_selector.hide()

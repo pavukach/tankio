@@ -31,9 +31,7 @@ func _connect_player(player_id: int) -> void:
 
 
 func _on_peer_disconnected(player_id: int) -> void:
-	var player_context: PlayerContext = _contexts.get(player_id)
-	if player_context == null:
-		return
+	var player_context: PlayerContext = _contexts[player_id]
 	remove_child(player_context)
 	player_context.queue_free()
 	_contexts.erase(player_id)
