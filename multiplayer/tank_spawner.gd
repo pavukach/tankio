@@ -99,7 +99,6 @@ func _on_spawn_requested(peer_id: int, tank_entry_index: int) -> void:
 		ctx.attach_tank(tank)
 		ctx.bus.send_spawned(tank.get_path())
 
-	# Anchored on the hull, which is the part that moves.
 	var spawn_zone := InterestZone.new(peer_id, InterestZone.SPAWN_RADIUS, InterestZone.Type.SPAWN)
 	var despawn_zone := InterestZone.new(peer_id, InterestZone.DESPAWN_RADIUS, InterestZone.Type.DESPAWN)
 	tank.hull.add_child(spawn_zone)

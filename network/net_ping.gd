@@ -1,12 +1,6 @@
 class_name NetPing
 extends NetHost
 
-## Measures round-trip time to the server.
-##
-## A client periodically sends a sequence number that the server echoes back
-## unchanged, and halves the round-trip to estimate one-way latency. The
-## timeline sizes its interpolation delay from that estimate.
-
 const METHOD_REQUEST := 0
 const METHOD_REPLY := 1
 
@@ -24,7 +18,6 @@ func _ready() -> void:
 	claim_id(NetworkCore.PING_ENTITY)
 
 
-## Smoothed one-way latency in seconds. Zero until the first reply arrives.
 func latency() -> float:
 	return _latency
 
@@ -51,7 +44,6 @@ func _on_request(sequence: int) -> void:
 
 
 func _on_reply(sequence: int) -> void:
-	# Replies to superseded pings say nothing about the current round-trip.
 	if sequence != _sequence:
 		return
 	var one_way := (Time.get_ticks_msec() - _sent_at_ms) / 2000.0

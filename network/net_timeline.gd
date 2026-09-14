@@ -1,14 +1,6 @@
 class_name NetTimeline
 extends Node
 
-## The shared clock replication is expressed in.
-##
-## The server counts physics ticks and stamps every outgoing packet with
-## `server_tick()`. A client tracks the newest tick it has received and runs
-## `playhead()` behind it by a delay sized from measured latency, so a variable
-## sampled at the playhead normally has a snapshot on either side to
-## interpolate between.
-
 signal tick_passed(tick: int)
 
 var _server_tick := 0
@@ -44,8 +36,6 @@ func server_tick() -> int:
 	return _server_tick
 
 
-## Client-side replication time, in server ticks. Negative until the first
-## packet arrives.
 func playhead() -> float:
 	return _playhead
 
@@ -61,10 +51,6 @@ func _emit_tick_passed() -> void:
 		tick_passed.emit(_last_emitted_tick)
 
 
-## Runs the playhead on the local clock and eases it toward `_delay_ticks`
-## behind the newest tick received, so jitter and clock drift are absorbed over
-## several ticks. Driving it from packet arrival instead would step the
-## playhead from one whole tick to the next, leaving nothing to interpolate.
 func _advance(delta: float) -> void:
 	if _latest_tick < 0:
 		return
@@ -77,8 +63,6 @@ func _advance(delta: float) -> void:
 	_playhead = lerpf(_playhead, target, NetConfig.PLAYHEAD_CORRECTION)
 
 
-## Tracks measured latency, keeping the delay a margin above it so snapshots
-## have arrived by the time the playhead reaches them.
 func _update_delay() -> void:
 	var target := clampf(
 		NetManager.ping.latency() * Engine.physics_ticks_per_second

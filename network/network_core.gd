@@ -3,8 +3,6 @@ extends RefCounted
 
 const HEADER_SIZE := 9
 const CONTEXT_ENTITY := 0xFFFFFFFD
-## Reserved id for the latency probe, which exists on both ends before any
-## entity has been assigned one.
 const PING_ENTITY := 0xFFFFFFFE
 
 signal peer_connected(id: int)
@@ -14,8 +12,6 @@ signal packet_received(tick: int)
 
 var peer: MultiplayerPeer
 var sender_id: int
-## Server tick the packet being handled was sent on. Zero for client packets,
-## which carry no tick of their own.
 var packet_tick: int
 var _entities: Dictionary[int, Object] = {}
 var _contexts: Dictionary[int, Object] = {}

@@ -8,12 +8,8 @@ var ability := false
 
 var camera: Camera2D
 
-# True when this instance is the authoritative receiver under a player's
-# PlayerContext (server side). False for the autoload capturer (client side).
 var receiver := false
 
-# Client capturer only samples input after the local player's tank has spawned
-# (so a camera exists). Activated by LocalBus.local_player_spawned.
 var _active := false
 
 

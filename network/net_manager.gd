@@ -13,7 +13,6 @@ func _ready() -> void:
 	interest = NetInterest.new()
 	ping = NetPing.new()
 	timeline = NetTimeline.new()
-	# Order fixes the ids the spawner and ping claim, which both ends rely on.
 	add_child(spawner)
 	add_child(ping)
 	add_child(timeline)

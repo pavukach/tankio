@@ -1,9 +1,6 @@
 class_name NetNode
 extends NetObject
 
-## Reserved method slots. Every entity replicates its initial state through
-## one and its per-tick snapshot through the other, so registered methods and
-## reliable variables are numbered from here on.
 const METHOD_CREATE := 0
 const METHOD_SNAPSHOT := 1
 
@@ -95,10 +92,6 @@ func update_reliable(player_id: int) -> void:
 		)
 
 
-## Keeps a newly replicated entity out of sight until the playhead reaches the
-## tick it was spawned on. The node itself has to exist right away so that the
-## snapshots addressed to it can be buffered, but showing it immediately would
-## put it on screen ahead of the state around it.
 func hide_until_tick(tick: int) -> void:
 	visible = false
 	run_at_replication_tick(tick, func(): visible = true)

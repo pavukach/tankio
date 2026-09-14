@@ -1,13 +1,6 @@
 class_name NetVar
 extends RefCounted
 
-## A value the server owns and replicates to clients.
-##
-## The server writes it with set_value(). Unreliable snapshots reach clients
-## through receive(), which files them under the tick they were sent on, and
-## get_value() then samples that history at the interpolation playhead using
-## `blend`. Values replicated reliably have no history and read back verbatim.
-
 var _value
 var _initial
 var _type

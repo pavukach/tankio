@@ -1,9 +1,6 @@
 class_name NetHistory
 extends RefCounted
 
-## Received snapshots of one variable, ordered by ascending tick and bounded to
-## NetConfig.SNAPSHOT_HISTORY entries.
-
 class Sample:
 	var tick: int
 	var value: Variant
@@ -21,7 +18,6 @@ func is_empty() -> bool:
 
 
 func add(tick: int, value: Variant) -> void:
-	# Snapshots normally arrive in order, so scan back from the newest.
 	var at := _samples.size()
 	while at > 0 and _samples[at - 1].tick > tick:
 		at -= 1
@@ -33,8 +29,6 @@ func add(tick: int, value: Variant) -> void:
 		_samples.remove_at(0)
 
 
-## Value at `playhead`, blended between the two samples bracketing it. Clamps
-## to the oldest or newest sample when the playhead falls outside the history.
 func sample(playhead: float, blend: Callable) -> Variant:
 	var newest := _samples.size() - 1
 	if playhead >= _samples[newest].tick:

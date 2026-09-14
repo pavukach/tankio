@@ -6,7 +6,6 @@ enum Type {
 	INT,
 	FLOAT,
 	STRING,
-	## Injected by NetworkCore from the transport sender id; never on the wire.
 	PEER,
 }
 

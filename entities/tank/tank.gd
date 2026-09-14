@@ -14,8 +14,6 @@ func _ready():
 	super._ready()
 	if NetManager.network.is_server():
 		_setup_health()
-		# The hull is what moves, so interest has to be measured from it. This
-		# node keeps the transform it was spawned with.
 		hull.add_child(InterestTarget.new(network_id))
 
 func attach_input(reader: InputReader) -> void:
