@@ -1,6 +1,8 @@
 class_name ReloadBarUI
 extends ProgressBar
 
+const FILL_SCALE := 100.0
+
 var _reload_time: float = 0.0
 var _reload_elapsed: float = 0.0
 var _is_reloading: bool = false
@@ -11,9 +13,9 @@ func _ready() -> void:
 
 func _setup_background() -> void:
 	var bg := StyleBoxFlat.new()
-	bg.bg_color = Color(0.0, 0.0, 0.0, 0.3)
-	bg.border_color = Color(0.4, 0.4, 0.4)
-	bg.set_border_width_all(3)
+	bg.bg_color = BarStyle.BG_COLOR
+	bg.border_color = BarStyle.BORDER_COLOR
+	bg.set_border_width_all(BarStyle.FILL_BORDER_WIDTH)
 	add_theme_stylebox_override("background", bg)
 
 func _process(delta: float) -> void:
@@ -21,7 +23,7 @@ func _process(delta: float) -> void:
 		return
 	_reload_elapsed += delta
 	var progress: float = min(_reload_elapsed / _reload_time, 1.0)
-	value = progress * 100.0
+	value = progress * FILL_SCALE
 	_update_color(progress)
 	if _reload_elapsed >= _reload_time:
 		_is_reloading = false
@@ -31,7 +33,7 @@ func start_reload(time: float) -> void:
 	_reload_time = time
 	_reload_elapsed = 0.0
 	_is_reloading = true
-	max_value = 100
+	max_value = FILL_SCALE
 	value = 0
 	show()
 	_set_fill_color(Color(1.0, 0.0, 0.0))
@@ -41,15 +43,7 @@ func stop() -> void:
 	hide()
 
 func _update_color(ratio: float) -> void:
-	_set_fill_color(_reload_color(ratio))
-
-static func _reload_color(ratio: float) -> Color:
-	if ratio > 0.5:
-		var t := (ratio - 0.5) * 2.0
-		return Color(1.0 - t, 1.0, 0.0)
-	else:
-		var t := ratio * 2.0
-		return Color(1.0, t, 0.0)
+	_set_fill_color(BarStyle.gradient_color(ratio))
 
 func _set_fill_color(color: Color) -> void:
 	var style := StyleBoxFlat.new()

@@ -6,7 +6,7 @@ signal tick_passed(tick: int)
 var _server_tick := 0
 var _latest_tick := -1
 var _playhead := -1.0
-var _delay_ticks := NetConfig.INITIAL_INTERP_DELAY_TICKS
+var _delay_ticks := NetTimelineConfig.INITIAL_INTERP_DELAY_TICKS
 var _last_emitted_tick := -1
 
 
@@ -56,23 +56,23 @@ func _advance(delta: float) -> void:
 		return
 	_update_delay()
 	var target := _latest_tick - _delay_ticks
-	if _playhead < 0.0 or absf(target - _playhead) > NetConfig.PLAYHEAD_RESYNC_TICKS:
+	if _playhead < 0.0 or absf(target - _playhead) > NetTimelineConfig.PLAYHEAD_RESYNC_TICKS:
 		_playhead = target
 		return
 	_playhead += delta * Engine.physics_ticks_per_second
-	_playhead = lerpf(_playhead, target, NetConfig.PLAYHEAD_CORRECTION)
+	_playhead = lerpf(_playhead, target, NetTimelineConfig.PLAYHEAD_CORRECTION)
 
 
 func _update_delay() -> void:
 	var target := clampf(
 		NetManager.ping.latency() * Engine.physics_ticks_per_second
-		+ NetConfig.INTERP_DELAY_MARGIN_TICKS,
-		NetConfig.MIN_INTERP_DELAY_TICKS,
-		NetConfig.MAX_INTERP_DELAY_TICKS,
+		+ NetTimelineConfig.INTERP_DELAY_MARGIN_TICKS,
+		NetTimelineConfig.MIN_INTERP_DELAY_TICKS,
+		NetTimelineConfig.MAX_INTERP_DELAY_TICKS,
 	)
 	var rate := (
-		NetConfig.DELAY_GROW_RATE
+		NetTimelineConfig.DELAY_GROW_RATE
 		if target > _delay_ticks
-		else NetConfig.DELAY_SHRINK_RATE
+		else NetTimelineConfig.DELAY_SHRINK_RATE
 	)
 	_delay_ticks = lerpf(_delay_ticks, target, rate)

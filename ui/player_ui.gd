@@ -1,6 +1,8 @@
 class_name PlayerUI
 extends CanvasLayer
 
+const AUTOSPAWN_DELAY := 1.5
+
 var _tank: Tank
 
 @onready var _selector := %TankSelector
@@ -21,7 +23,7 @@ func initialize():
 	LocalBus.reload_started.connect(_on_reload_started)
 	LocalBus.local_player_spawned.connect(_on_local_player_spawned)
 	if OS.get_environment("TANKIO_AUTOSPAWN") == "1":
-		get_tree().create_timer(1.5).timeout.connect(_on_tank_selected.bind(0))
+		get_tree().create_timer(AUTOSPAWN_DELAY).timeout.connect(_on_tank_selected.bind(0))
 
 
 func _local_context() -> PlayerContext:

@@ -25,7 +25,7 @@ func add(tick: int, value: Variant) -> void:
 		_samples[at - 1].value = value
 		return
 	_samples.insert(at, Sample.new(tick, value))
-	if _samples.size() > NetConfig.SNAPSHOT_HISTORY:
+	if _samples.size() > NetTimelineConfig.SNAPSHOT_HISTORY:
 		_samples.remove_at(0)
 
 

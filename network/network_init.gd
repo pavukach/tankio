@@ -12,9 +12,9 @@ func _start_server() -> void:
 	if port < 0:
 		port = NetConfig.PORT
 	var ws := WebSocketMultiplayerPeer.new()
-	ws.create_server(port, "0.0.0.0")
+	ws.create_server(port, NetConfig.BIND_ADDRESS)
 	NetManager.network.set_peer(ws, true)
-	print("Server started on 0.0.0.0:%d" % port)
+	print("Server started on %s:%d" % [NetConfig.BIND_ADDRESS, port])
 	_load_game.call_deferred()
 
 func _parse_port() -> int:

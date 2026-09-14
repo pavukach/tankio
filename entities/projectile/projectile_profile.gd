@@ -1,6 +1,8 @@
 class_name ProjectileProfile
 extends Resource
 
+const COS_FLOOR := 0.01
+
 @export var speed: float = 500.0
 @export var damage: float = 10.0
 @export var lifetime: float = 5.0
@@ -14,4 +16,4 @@ func get_penetration(time_elapsed: float) -> float:
 func get_effective_armor(raw_thickness: float, impact_normal: Vector2, bullet_dir: Vector2) -> float:
 	var incidence := acos(clamp(-bullet_dir.dot(impact_normal), 0.0, 1.0))
 	var adjusted: float = max(0.0, incidence - deg_to_rad(normalization))
-	return raw_thickness / max(cos(adjusted), 0.01)
+	return raw_thickness / max(cos(adjusted), COS_FLOOR)

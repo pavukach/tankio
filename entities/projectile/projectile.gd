@@ -2,6 +2,7 @@ class_name Projectile
 extends Node2D
 
 const METHOD_HIT_EFFECT := 2
+const FORWARD_OFFSET := PI / 2
 
 var _velocity := Vector2.ZERO
 var _lifetime := 5.0
@@ -55,7 +56,7 @@ func setup(
 	net.owner_id = p_owner_id
 	_rot.set_value(angle)
 	rotation = angle
-	_velocity = Vector2.from_angle(angle - PI / 2) * profile.speed
+	_velocity = Vector2.from_angle(angle - FORWARD_OFFSET) * profile.speed
 	_lifetime = profile.lifetime
 	_previous_position = from_pos
 
