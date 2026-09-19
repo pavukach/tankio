@@ -54,8 +54,8 @@ func _register_methods() -> void:
 		[ByteData.Type.PEER, ByteData.Type.UINT],
 		true,
 	))
-	network_methods.append(NetFunc.new(_on_tank_spawned, [ByteData.Type.STRING], true))
-	network_methods.append(NetFunc.new(_on_tank_died, [], true))
+	register_event(_on_tank_spawned, [ByteData.Type.STRING], true)
+	register_event(_on_tank_died, [], true)
 
 
 func attach_tank(tank: Tank) -> void:

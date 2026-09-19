@@ -92,11 +92,6 @@ func update_reliable(player_id: int) -> void:
 		)
 
 
-func hide_until_tick(tick: int) -> void:
-	visible = false
-	run_at_replication_tick(tick, func(): visible = true)
-
-
 func destroy() -> void:
 	destroyed.emit()
 	queue_free()

@@ -11,35 +11,26 @@ func register_method(callable: Callable, arg_types: Array[ByteData.Type], reliab
 	return index
 
 
-func register_replication_method(
-	callable: Callable,
-	arg_types: Array[ByteData.Type],
-	reliable: bool,
-) -> int:
-	var index := network_methods.size()
-	network_methods.append(NetFunc.new(callable, arg_types, reliable, true))
-	return index
-
-
-func invoke_replication_method(
-	method: NetFunc,
-	args: Array,
-	tick: int,
-) -> void:
+func register_event(callable: Callable, arg_types: Array[ByteData.Type], reliable: bool) -> int:
 	if NetManager.network.is_server():
-		method.invoke(args)
-		return
-	if NetManager.timeline.playhead() >= tick:
-		method.invoke(args)
-		return
-	ReplicationTickWaiter.new(tick, func(): method.invoke(args))
+		return register_method(callable, arg_types, reliable)
+	return register_method(_wrap_event(callable), arg_types, reliable)
 
 
-func run_at_replication_tick(tick: int, action: Callable) -> void:
-	if NetManager.network.is_server() or NetManager.timeline.playhead() >= tick:
-		action.call()
-		return
-	ReplicationTickWaiter.new(tick, action)
+func _wrap_event(callable: Callable) -> Callable:
+	return func(...args: Array) -> void:
+		var tick := NetManager.network.packet_tick
+		if NetManager.timeline.playhead() >= tick:
+			callable.callv(args)
+			return
+		var captured: Array = args.duplicate()
+		var on_tick: Callable
+		on_tick = func(passed_tick: int) -> void:
+			if passed_tick < tick:
+				return
+			NetManager.timeline.tick_passed.disconnect(on_tick)
+			callable.callv(captured)
+		NetManager.timeline.tick_passed.connect(on_tick)
 
 
 func destroy() -> void:

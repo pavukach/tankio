@@ -12,10 +12,8 @@ var scene_to_index: Dictionary = {}
 
 func _ready() -> void:
 	claim_id(NetManager.network.acquire_id())
-	network_methods = [
-		NetFunc.new(_spawn_remote, [ByteData.Type.UINT, ByteData.Type.UINT, ByteData.Type.UINT], true),
-		NetFunc.new(_despawn_remote, [ByteData.Type.UINT], true),
-	]
+	register_event(_spawn_remote, [ByteData.Type.UINT, ByteData.Type.UINT, ByteData.Type.UINT], true)
+	register_event(_despawn_remote, [ByteData.Type.UINT], true)
 
 
 func _world() -> Node:
@@ -68,11 +66,10 @@ func _spawn_remote(entity_id: int, index: int, owner_id: int) -> void:
 	entity.network_id = entity_id
 	entity.network_type = index
 	entity.owner_id = owner_id
-	NetManager.network.add_entity(entity_id, entity)
 	entity.add_to_group(str(owner_id))
 	entity.set_meta("peer_id", owner_id)
 	_world().add_child(entity)
-	entity.hide_until_tick(NetManager.network.packet_tick)
+	NetManager.network.add_entity(entity_id, entity)
 
 
 func _despawn_remote(entity_id: int) -> void:

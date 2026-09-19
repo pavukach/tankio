@@ -14,6 +14,8 @@ var peer: MultiplayerPeer
 var sender_id: int
 var packet_tick: int
 var _entities: Dictionary[int, Object] = {}
+var _pending_packets: Dictionary[int, Array] = {}
+var _retired_entities: Dictionary[int, bool] = {}
 var _contexts: Dictionary[int, Object] = {}
 var _players: Array[int] = []
 var _ids := OrderedIndexBank.new()
@@ -93,6 +95,8 @@ func poll(_delta: float) -> void:
 
 func add_entity(id: int, entity: Object) -> void:
 	_entities[id] = entity
+	_retired_entities.erase(id)
+	_flush_pending(id)
 
 
 func get_entity(id: int) -> Object:
@@ -101,6 +105,8 @@ func get_entity(id: int) -> Object:
 
 func remove_entity(id: int) -> void:
 	_entities.erase(id)
+	_pending_packets.erase(id)
+	_retired_entities[id] = true
 
 
 func register_context(peer_id: int, context: Object) -> void:
@@ -170,13 +176,18 @@ func _receive_packet() -> void:
 	packet_tick = buffer.get_u32()
 	packet_received.emit(packet_tick)
 
-	var entity := _resolve_entity(entity_id, sender_id)
-	if entity == null:
-		return
-
 	var payload: PackedByteArray = buffer.get_data(
 		buffer.get_available_bytes()
 	)[1]
+
+	var entity := _resolve_entity(entity_id, sender_id)
+	if entity == null:
+		if _retired_entities.get(entity_id, false):
+			return
+		if not _pending_packets.has(entity_id):
+			_pending_packets[entity_id] = []
+		_pending_packets[entity_id].append([method_id, payload, packet_tick, sender_id])
+		return
 
 	_call_network_method(entity, method_id, payload)
 
@@ -190,7 +201,22 @@ func _call_network_method(
 	var method: NetFunc = methods[method_id]
 
 	var args := ByteData.decode_with_peer(payload, method.get_args(), sender_id)
-	if not _is_server and method.wait_for_packet_tick:
-		(entity as NetObject).invoke_replication_method(method, args, packet_tick)
-	else:
-		method.invoke(args)
+	method.invoke(args)
+
+
+func _flush_pending(entity_id: int) -> void:
+	var queued: Array = _pending_packets.get(entity_id, [])
+	_pending_packets.erase(entity_id)
+	if queued.is_empty():
+		return
+	var entity := _entities.get(entity_id)
+	var restore_tick := packet_tick
+	var restore_sender := sender_id
+	for packet in queued:
+		var method_id: int = packet[0]
+		var payload: PackedByteArray = packet[1]
+		packet_tick = packet[2]
+		sender_id = packet[3]
+		_call_network_method(entity, method_id, payload)
+	packet_tick = restore_tick
+	sender_id = restore_sender
