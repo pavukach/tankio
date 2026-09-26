@@ -50,9 +50,10 @@ func _process(_delta: float) -> void:
 	shooting = Input.is_action_pressed("player_shoot")
 	ability = Input.is_action_pressed("player_ability")
 
-	if camera == null:
+	if not is_instance_valid(camera):
 		camera = get_viewport().get_camera_2d()
-	mouse = camera.get_global_mouse_position()
+	if is_instance_valid(camera):
+		mouse = camera.get_global_mouse_position()
 
 	if not NetManager.network.is_server():
 		NetManager.network.send(
