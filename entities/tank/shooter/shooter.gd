@@ -41,8 +41,10 @@ func _fire() -> void:
 	var spawn_pos := muzzle.global_position
 	var angle := global_rotation
 	var owner_id := _net.owner_id
-	var entity := NetManager.spawner.spawn(_proj_index)
+	var entity := NetManager.spawner.spawn(_proj_index, Transform2D(0.0, spawn_pos), owner_id)
 	var projectile := entity.find_child("Projectile", true, false) as Projectile
+	projectile.rotation = angle
+	NetManager.spawner.add_to_world(entity)
 	projectile.setup(spawn_pos, angle, owner_id)
 	reload()
 

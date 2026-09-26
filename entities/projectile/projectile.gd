@@ -25,7 +25,7 @@ func _ready() -> void:
 	net.register_var(_rot)
 	net.register_initial_var(_rot)
 	net.register_event(
-		_on_hit_effect,
+		Effects.net_hit,
 		[ByteData.Type.FLOAT, ByteData.Type.FLOAT, ByteData.Type.BYTE],
 		true,
 	)
@@ -91,7 +91,3 @@ func _request_despawn() -> void:
 	_despawning = true
 	if NetManager.network.is_server():
 		net.destroy()
-
-
-func _on_hit_effect(x: float, y: float, penetrated: int) -> void:
-	Effects.spawn_hit_effect(Vector2(x, y), penetrated != 0)

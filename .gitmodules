@@ -1,0 +1,4 @@
+[submodule "godot_net"]
+	path = addons/godot_net
+	url = git@github.com:pavukach/godot-net.git
+	branch = main

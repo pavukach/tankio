@@ -36,6 +36,8 @@ func _ready():
 
 
 func setup():
+	var world := get_node("/root/Game/World")
+	NetManager.spawner.world = world
 	spawn_points_root = NodePath("/root/Game/World/SpawnPoints")
 	_collect_spawn_points()
 
@@ -73,8 +75,10 @@ func _on_spawn_requested(peer_id: int, tank_entry_index: int) -> void:
 	var tank := NetManager.spawner.spawn(
 		tank_entry_index,
 		Transform2D(spawn_rotation, spawn_position),
+		peer_id,
 	) as Tank
 	_configure_tank(tank, peer_id)
+	NetManager.spawner.add_to_world(tank)
 	NetManager.interest.start_tracking(tank.network_id, peer_id)
 	_player_tanks[peer_id] = tank
 

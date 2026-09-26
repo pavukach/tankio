@@ -11,10 +11,7 @@ func _start_server() -> void:
 	var port := _parse_port()
 	if port < 0:
 		port = NetConfig.PORT
-	var ws := WebSocketMultiplayerPeer.new()
-	ws.create_server(port, NetConfig.BIND_ADDRESS)
-	NetManager.network.set_peer(ws, true)
-	print("Server started on %s:%d" % [NetConfig.BIND_ADDRESS, port])
+	NetManager.init_server(port, NetConfig.BIND_ADDRESS)
 	_load_game.call_deferred()
 
 func _parse_port() -> int:
@@ -27,11 +24,8 @@ func connect_to_server(ip: String, port: int, protocol: String = "wss") -> void:
 	_load_game()
 	await get_tree().process_frame
 
-	var ws := WebSocketMultiplayerPeer.new()
-	ws.create_client("%s://%s:%d" % [protocol, ip, port])
-	NetManager.network.set_peer(ws, false)
+	NetManager.init_client(protocol, ip, port)
 	NetManager.network.connected_to_server.connect(_on_connected, CONNECT_ONE_SHOT)
-	print("Client connecting to %s://%s:%d" % [protocol, ip, port])
 
 func _load_game() -> void:
 	var scene := load("res://global/game.tscn")

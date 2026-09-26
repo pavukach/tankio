@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dt4t2tfbda38i"]
 
-[ext_resource type="Script" uid="uid://bim7llxl3ggtw" path="res://network/network_init.gd" id="1_init"]
+[ext_resource type="Script" uid="uid://bim7llxl3ggtw" path="res://multiplayer/network_init.gd" id="1_init"]
 [ext_resource type="Script" uid="uid://dgacdim2vlm34" path="res://global/connection_ui.gd" id="2_ui"]
 
 [node name="Connection" type="Node2D" unique_id=290928930]
