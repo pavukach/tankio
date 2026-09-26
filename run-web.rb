@@ -10,6 +10,7 @@ BUILD_DIR = "build"
 CADDYFILE = "#{LOG_DIR}/Caddyfile"
 
 FileUtils.mkdir_p(LOG_DIR)
+FileUtils.mkdir_p(BUILD_DIR)
 
 pids = []
 
