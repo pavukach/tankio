@@ -29,7 +29,7 @@ func _resolve_defaults() -> Dictionary:
 	if port < 0:
 		port = NetConfig.PORT
 	if proto.is_empty():
-		proto = "ws"
+		proto = "wss" if OS.has_feature("web") else "ws"
 	return {"host": host, "port": port, "proto": proto}
 
 func _prefill_defaults() -> void:
